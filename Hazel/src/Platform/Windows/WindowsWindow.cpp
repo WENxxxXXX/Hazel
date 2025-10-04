@@ -6,6 +6,7 @@
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
+
 namespace Hazel {
 
 	static bool s_GLFWInitialized = false;
@@ -49,6 +50,10 @@ namespace Hazel {
 
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		glfwMakeContextCurrent(m_Window);
+
+		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+
 		/*用来将自定义的指针数据与窗口对象相关联；这样做的目的通常是为了在程序中
 		可以方便地访问和操作与该窗口相关的自定义数据。
 		例如，当你需要在 GLFW 窗口回调函数中访问特定窗口的自定义数据时，
