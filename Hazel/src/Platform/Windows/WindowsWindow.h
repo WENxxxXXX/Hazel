@@ -38,7 +38,7 @@ namespace Hazel {
 			EventCallbackFn EventCallback;
 		};
 
-		WindowData m_Data;
+		WindowData m_Data;//记录窗口信息和窗口回调
 	};
 
 }
