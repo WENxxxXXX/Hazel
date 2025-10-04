@@ -102,9 +102,6 @@ namespace Hazel {
 				break;
 			}
 			}
-
-			WindowCloseEvent event;
-			data.EventCallback(event);
 		});
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 		{
@@ -125,9 +122,6 @@ namespace Hazel {
 				break;
 			}
 			}
-
-			WindowCloseEvent event;
-			data.EventCallback(event);
 		});
 		glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xOffset, double yOffset)
 		{

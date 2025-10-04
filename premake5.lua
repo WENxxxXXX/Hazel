@@ -16,9 +16,11 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"--£¨·½±ãÊä³öºÍÖĞ¼
 IncludeDir = {}--´´½¨Ò»¸öÃûÎªIncludeDirµÄ±í
 IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"--½«±íµÄ"GLFW"¼üË÷Òıµ½´ËÂ·¾¶
 IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
+IncludeDir["Imgui"] = "Hazel/vendor/imgui"
 
 include "Hazel/vendor/GLFW"-- ¼ìË÷Õâ¸öÄ¿Â¼ÏÂµÄluaÎÄ¼ş£¬¸ù¾İÕâĞ©luaÎÄ¼ş¹¹½¨ÏîÄ¿
 include "Hazel/vendor/Glad"
+include "Hazel/vendor/imgui"
 
 project "Hazel"
     location "Hazel"        --ÏîÄ¿ÎÄ¼şµÄÊä³öÄ¿Â¼
@@ -42,13 +44,15 @@ project "Hazel"
         "%{prj.name}/src",
         "%{prj.name}/vendor/spdlog/include",
         "%{IncludeDir.GLFW}", -- %{}Ê¹ÓÃÈ«¾Ö±äÁ¿
-        "%{IncludeDir.Glad}"
+        "%{IncludeDir.Glad}",
+        "%{IncludeDir.Imgui}"
     }
 
     links       --ÎªÏîÄ¿(.dll)¸½¼ÓÒÀÀµÏî
     {
         "GLFW", --ÒÀÀµGLFWÏîÄ¿
         "Glad",
+        "ImGui",
         "opengl32.lib"
     }
 
