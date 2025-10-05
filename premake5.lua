@@ -18,6 +18,7 @@ IncludeDir = {}--创建一个名为IncludeDir的表
 IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"--将表的"GLFW"键索引到此路径
 IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
 IncludeDir["Imgui"] = "Hazel/vendor/imgui"
+IncludeDir["glm"] = "Hazel/vendor/glm"
 
 include "Hazel/vendor/GLFW"-- 检索这个目录下的lua文件，根据这些lua文件构建项目
 include "Hazel/vendor/Glad"
@@ -38,7 +39,9 @@ project "Hazel"
     files       --将源代码文件添加到特定的项目中
     {
         "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/glm/glm/**.hpp",
+        "%{prj.name}/vendor/glm/glm/**.inl"
     }
 
     includedirs --包含目录
@@ -47,7 +50,8 @@ project "Hazel"
         "%{prj.name}/vendor/spdlog/include",
         "%{IncludeDir.GLFW}", -- %{}使用全局变量
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.Imgui}"
+        "%{IncludeDir.Imgui}",
+        "%{IncludeDir.glm}"
     }
 
     links       --为项目(.dll)附加依赖项
@@ -109,7 +113,8 @@ project "Sandbox"
     includedirs
     {
         "Hazel/vendor/spdlog/include",
-        "Hazel/src"
+        "Hazel/src",
+        "%{IncludeDir.glm}"
     }
 
     links
