@@ -38,7 +38,6 @@ namespace Hazel
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
-		HZ_CORE_INFO(int(e.GetEventType()));
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 
 		//HZ_CORE_TRACE("{0}", e.ToString());

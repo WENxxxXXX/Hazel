@@ -2,6 +2,10 @@
 
 #include "Hazel/Layer.h"
 
+#include "Hazel/Events/ApplicationEvent.h"
+#include "Hazel/Events/KeyEvent.h"
+#include "Hazel/Events/MouseEvent.h"
+
 namespace Hazel
 {
 	class HAZEL_API ImGuiLayer : public Layer
@@ -14,6 +18,15 @@ namespace Hazel
 		void OnDetach();
 		void OnUpdate();
 		void OnEvent(Event& event);
+	private:
+		bool OnWindowResizeEvent(WindowResizeEvent& e);
+		bool OnMouseMovedEvent(MouseMovedEvent& e);
+		bool OnMouseScrolledEvent(MouseScrolledEvent& e);
+		bool OnMouseButtonPressedEvent(MouseButtonPressedEvent& e);
+		bool OnMouseButtonReleasedEvent(MouseButtonReleasedEvent& e);
+		bool OnKeyTypedEvent(KeyTypedEvent& e);
+		bool OnKeyPressedEvent(KeyPressedEvent& e);
+		bool OnKeyReleasedEvent(KeyReleasedEvent& e);
 	private:
 		float m_Time;
 	};

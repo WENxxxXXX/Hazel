@@ -103,6 +103,14 @@ namespace Hazel {
 			}
 			}
 		});
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
+			{
+				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+				KeyTypedEvent event(keycode);
+				data.EventCallback(event);
+			}
+		);
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 		{
 			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
@@ -111,13 +119,13 @@ namespace Hazel {
 			{
 			case GLFW_PRESS:
 			{
-				KeyPressedEvent event(button);
+				MouseButtonPressedEvent event(button);
 				data.EventCallback(event);
 				break;
 			}
 			case GLFW_RELEASE:
 			{
-				KeyReleasedEvent event(button);
+				MouseButtonReleasedEvent event(button);
 				data.EventCallback(event);
 				break;
 			}
