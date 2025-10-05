@@ -2,6 +2,7 @@
 
 workspace "Hazel"
     architecture "x64"
+    startproject "Sandbox"          --[[启动项目]]
     configurations 
     { 
         "Debug",
@@ -26,6 +27,7 @@ project "Hazel"
     location "Hazel"        --项目文件的输出目录
     kind "SharedLib"        --类型（动态库）
     language "C++"          --语言
+    staticruntime "off"
 
     targetdir  ("bin/" .. outputdir .. "/%{prj.name}")      --输出目录(.. XX ..中 ".."是字符串连接符)
     objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")     --中间目录
@@ -58,7 +60,7 @@ project "Hazel"
 
     filter "system:windows"     --过滤器(如果系统是windows)
         cppdialect "C++17"      --C++标准（编译时）
-        staticruntime "On"      --是否静态链接运行时库（dll属性的文件需要打开）
+        --staticruntime "On"      --是否静态链接运行时库（dll属性的文件需要打开）
         systemversion "latest"  --windows SDK 版本
         defines                 --宏的声明
         {
@@ -76,17 +78,17 @@ project "Hazel"
 
     filter "configurations:Debug"
         defines "HZ_DEBUG"
-        buildoptions "/MDd"
+        runtime "Debug"
         symbols "On"
 
     filter "configurations:Release"
         defines "HZ_RELEASE"
-        buildoptions "/MD"
+        runtime "Release"
         optimize "On"
 
     filter "configurations:Dist"
         defines "HZ_DIST"
-        buildoptions "/MD"
+        runtime "Release"
         optimize "On"
 
 
@@ -94,6 +96,8 @@ project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
+    staticruntime "off"
+
     targetdir  ("bin/" .. outputdir .. "/%{prj.name}")
     objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -115,7 +119,7 @@ project "Sandbox"
 
     filter "system:windows"
         cppdialect "C++17"
-        staticruntime "On"
+        --staticruntime "On"
         systemversion "latest"
         defines
         {
@@ -124,13 +128,13 @@ project "Sandbox"
         buildoptions "/utf-8"
     filter "configurations:Debug"
         defines "HZ_DEBUG"
-        buildoptions "/MDd"
+        runtime "Debug"
         symbols "On"
     filter "configurations:Release"
         defines "HZ_RELEASE"
-        buildoptions "/MD"
+        runtime "Release"
         optimize "On"
     filter "configurations:Dist"
         defines "HZ_DIST"
-        buildoptions "/MD"
+        runtime "Release"
         optimize "On"
