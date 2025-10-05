@@ -75,6 +75,7 @@ namespace Hazel
 		Event& m_Event;
 	};
 
+	//不知道为什么不起作用
 	inline std::ostream& operator<<(std::ostream& os, const Event& e)
 	{
 		return os << e.ToString();

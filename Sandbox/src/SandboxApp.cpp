@@ -11,12 +11,26 @@ public:
 
 	void OnUpdate() override
 	{
-		HZ_INFO("ExampleLayer::Update");
+		//HZ_INFO("ExampleLayer::Update");
+		if (Hazel::Input::IsKeyPressed(HZ_KEY_TAB))
+		{
+			HZ_TRACE("Tab key is pressed (poll轮询)");
+		}
 	}
 
 	void OnEvent(Hazel::Event& event) override
 	{
-		HZ_TRACE("{0}", event.ToString());
+		//HZ_TRACE("{0}", event.ToString());
+
+		if (event.GetEventType() == Hazel::EventType::KeyPressed)
+		{
+			Hazel::KeyPressedEvent& e = (Hazel::KeyPressedEvent&)event;
+			if (e.GetKeyCode() == HZ_KEY_TAB)
+			{
+				HZ_TRACE("Tab key is pressed (event事件)");
+			}
+			HZ_TRACE("{0}", (char)e.GetKeyCode());//按照ASCII码打印key code
+		}
 	}
 };
 
@@ -25,7 +39,7 @@ class Sandbox : public Hazel::Application
 public:
 	Sandbox()
 	{
-		//PushLayer(new ExampleLayer());
+		PushLayer(new ExampleLayer());
 		PushOverlay(new Hazel::ImGuiLayer());
 	}
 
