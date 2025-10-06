@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Hazel/Window.h"
+#include "Hazel/Renderer/GraphicsContext.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -27,7 +29,10 @@ namespace Hazel {
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
 	private:
+		//声明了一个GLFW的窗口对象
 		GLFWwindow* m_Window;
+		//声明一个上下文对象（GraphicsContext类 没有构造函数，在.cpp中为其new一个指针对象）
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{

@@ -6,6 +6,8 @@
 #include "Hazel/Events/KeyEvent.h"
 #include "Hazel/Events/MouseEvent.h"
 
+#include "Platform/OpenGL/OpenGLContext.h"
+
 
 namespace Hazel {
 
@@ -48,11 +50,17 @@ namespace Hazel {
 			s_GLFWInitialized = true;
 		}
 
+		//初始化Windows对象并创建窗口上下文
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
-		glfwMakeContextCurrent(m_Window);
+		
+		//opengl+glfw上下文，不能扩展
+		//glfwMakeContextCurrent(m_Window);
+		////通过glad加载OpenGL提供的各种图形渲染函数
+		//int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		//HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+		m_Context = new OpenGLContext(m_Window);
+		m_Context->Init();
 
 		/*用来将自定义的指针数据与窗口对象相关联；这样做的目的通常是为了在程序中
 		可以方便地访问和操作与该窗口相关的自定义数据。
@@ -155,7 +163,8 @@ namespace Hazel {
 	void WindowsWindow::OnUpdate()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		//glfwSwapBuffers(m_Window);
+		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
