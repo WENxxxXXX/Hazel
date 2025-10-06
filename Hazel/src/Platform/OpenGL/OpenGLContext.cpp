@@ -18,6 +18,11 @@ namespace Hazel
 		//通过glad加载OpenGL提供的各种图形渲染函数
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
+
+		HZ_CORE_INFO("OpenGL info: ");
+		HZ_CORE_INFO("	Vendor: {0}", (const char*)glGetString(GL_VENDOR));
+		HZ_CORE_INFO("	Renderer: {0}", (const char*)glGetString(GL_RENDERER));
+		HZ_CORE_INFO("	Version: {0}", (const char*)glGetString(GL_VERSION));
 	}
 
 	void OpenGLContext::SwapBuffers()
