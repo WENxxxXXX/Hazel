@@ -26,9 +26,11 @@ include "Hazel/vendor/imgui"
 
 project "Hazel"
     location "Hazel"        --项目文件的输出目录
-    kind "SharedLib"        --类型（动态库）
+    --kind "SharedLib"        --类型（动态库）
+    kind "StaticLib"        --类型（静态库）
     language "C++"          --语言
-    staticruntime "off"
+    cppdialect "C++17"      --C++标准（编译时）
+    staticruntime "on"
 
     targetdir  ("bin/" .. outputdir .. "/%{prj.name}")      --输出目录(.. XX ..中 ".."是字符串连接符)
     objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")     --中间目录
@@ -42,6 +44,11 @@ project "Hazel"
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/vendor/glm/glm/**.hpp",
         "%{prj.name}/vendor/glm/glm/**.inl"
+    }
+
+    defines
+    {
+        "_CRT_SECURE_NO_WARNINGS"
     }
 
     includedirs --包含目录
@@ -63,13 +70,12 @@ project "Hazel"
     }
 
     filter "system:windows"     --过滤器(如果系统是windows)
-        cppdialect "C++17"      --C++标准（编译时）
-        --staticruntime "On"      --是否静态链接运行时库（dll属性的文件需要打开）
         systemversion "latest"  --windows SDK 版本
         defines                 --宏的声明
         {
             "HZ_PLATFORM_WINDOWS",
-            "HZ_BUILD_DLL"
+            "HZ_BUILD_DLL",
+            --"GLFW_INCLUDE_NONE"
         }
         outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}" 
         postbuildcommands       --构建项目完成后执行的指令
@@ -83,24 +89,25 @@ project "Hazel"
     filter "configurations:Debug"
         defines "HZ_DEBUG"
         runtime "Debug"
-        symbols "On"
+        symbols "on"
 
     filter "configurations:Release"
         defines "HZ_RELEASE"
         runtime "Release"
-        optimize "On"
+        optimize "on"
 
     filter "configurations:Dist"
         defines "HZ_DIST"
         runtime "Release"
-        optimize "On"
+        optimize "on"
 
 
 project "Sandbox"
     location "Sandbox"
     kind "ConsoleApp"
     language "C++"
-    staticruntime "off"
+    cppdialect "C++17"
+    staticruntime "on"
 
     targetdir  ("bin/" .. outputdir .. "/%{prj.name}")
     objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -124,23 +131,23 @@ project "Sandbox"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
-        --staticruntime "On"
         systemversion "latest"
+
         defines
         {
             "HZ_PLATFORM_WINDOWS"
         }
+
         buildoptions "/utf-8"
     filter "configurations:Debug"
         defines "HZ_DEBUG"
         runtime "Debug"
-        symbols "On"
+        symbols "on"
     filter "configurations:Release"
         defines "HZ_RELEASE"
         runtime "Release"
-        optimize "On"
+        optimize "on"
     filter "configurations:Dist"
         defines "HZ_DIST"
         runtime "Release"
-        optimize "On"
+        optimize "on"
