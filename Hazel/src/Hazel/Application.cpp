@@ -1,11 +1,11 @@
 #include "hzpch.h"
 
+#include <GLFW/glfw3.h>
+
 #include "Application.h"
 
 #include "Hazel/Log.h"
 #include "Hazel/Input.h"
-
-#include "Hazel/Renderer/Renderer.h"
 
 namespace Hazel
 {
@@ -20,6 +20,7 @@ namespace Hazel
 
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));//如果子类重写了OnEvent函数，则以子类为准
+		m_Window->SetVSync(true);
 		
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
@@ -59,9 +60,13 @@ namespace Hazel
 	{
 		while (m_Running)
 		{
+			float time = (float)glfwGetTime();
+			Timestep timestep = time - m_LastFrameTime;
+			m_LastFrameTime = time;
+
 			for (Layer* layer : m_LayerStack)
 			{
-				layer->OnUpdate();//执行逻辑更新(更新应用程序的逻辑状态）
+				layer->OnUpdate(timestep);//执行逻辑更新(更新应用程序的逻辑状态）
 			}
 
 			m_ImGuiLayer->Begin();

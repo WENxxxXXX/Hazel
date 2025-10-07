@@ -13,8 +13,8 @@ namespace Hazel
 
 	void OrthoGraphicCamera::UpdateViewMatrix()
 	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_Position)								//局部空间 -> 世界空间 （乘以model模型矩阵 : glm::translate）
-			* glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f));		//世界空间 -> 观察空间 （乘以 view观察矩阵 : glm::rotation）
+		glm::mat4 transform = glm::rotate(glm::mat4(1.0f), glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::translate(glm::mat4(1.0f), m_Position);
 
 		m_ViewMatrix = glm::inverse(transform);
 
