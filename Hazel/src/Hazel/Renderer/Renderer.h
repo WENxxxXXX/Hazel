@@ -13,7 +13,8 @@ namespace Hazel
 		static void EndScene();
 
 		static void Submit(const std::shared_ptr<Shader>& shader, 
-			const std::shared_ptr<VertexArray>& vertexArray);
+			const std::shared_ptr<VertexArray>& vertexArray,
+			const glm::mat4& transform);
 
 		inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); }
 	private:
