@@ -14,6 +14,7 @@ namespace Hazel
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application()
+		: m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		HZ_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
@@ -29,14 +30,12 @@ namespace Hazel
 			 0.5f, -0.5f, 0.0f, 1.0f, 0.3f, 0.8f, 1.0f,
 			 0.0f,  0.5f, 0.0f, 1.0f, 0.8f, 0.2f, 1.0f
 		};
+		unsigned int indices[3] = { 0, 1, 2 };
 
-		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-
-		unsigned int indices[3]{
-			0, 1, 2
-		};
-
-		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		std::shared_ptr<VertexBuffer> vertexBuffer(
+			VertexBuffer::Create(vertices, sizeof(vertices)));
+		std::shared_ptr<IndexBuffer> indexBuffer(
+			IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 
 		m_VertexArray.reset(VertexArray::Create());
 		BufferLayout layout =
@@ -44,12 +43,9 @@ namespace Hazel
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Color" }
 		};
-		// when we set the layout, we store the layout data in OpenGLBuffer.
-		// m_Layout by "SetLayout()" function, then delete layout.
-		m_VertexBuffer->SetLayout(layout);
-
-		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
-		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+		vertexBuffer->SetLayout(layout);
+		m_VertexArray->AddVertexBuffer(vertexBuffer);
+		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		std::string vertexSrc = R"(
 			#version 330 core
@@ -59,11 +55,13 @@ namespace Hazel
 			out vec3 v_Position;
 			out vec4 v_Color;
 
+			uniform mat4 u_ViewProjection;
+
 			void main()
 			{
-				gl_Position = vec4(a_Position, 1.0);
 				v_Position = a_Position;
 				v_Color = a_Color;
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
 		std::string fragmentSrc = R"(
@@ -79,8 +77,57 @@ namespace Hazel
 				a_Color = v_Color;
 			}
 		)";
-
 		m_Shader.reset(new Shader(vertexSrc, fragmentSrc));
+
+		// -------------- Square rendering ----------------
+		float squareVertices[3 * 4] =
+		{
+			-0.75f, -0.75f, -0.1f,
+			 0.75f, -0.75f, -0.1f,
+			 0.75f,  0.75f, -0.1f,
+			-0.75f,  0.75f, -0.1f
+		};
+		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
+
+		m_SquareVA.reset(VertexArray::Create());
+
+		std::shared_ptr<VertexBuffer> squareVB;
+		squareVB.reset(VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		std::shared_ptr<IndexBuffer> squareIB;
+		squareIB.reset(IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+
+		BufferLayout squareLayout =
+		{
+			{ShaderDataType::Float3, "a_Position"}
+		};
+		squareVB->SetLayout(squareLayout);
+		m_SquareVA->AddVertexBuffer(squareVB);
+		m_SquareVA->SetIndexBuffer(squareIB);
+
+		std::string squareVertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+
+			uniform mat4 u_ViewProjection;
+
+			void main()
+			{
+				gl_Position = vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+			}
+		)";
+		std::string squareFragSrc = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 a_Color;
+
+			void main()
+			{
+				a_Color = vec4(0.2, 0.3, 0.8, 1.0);
+			}
+		)";
+		m_SquareShader.reset(new Shader(squareVertexSrc, squareFragSrc));
 	}
 	Application::~Application()
 	{
@@ -120,10 +167,13 @@ namespace Hazel
 			RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 			RendererCommand::Clear();
 
-			Renderer::BeginScene();//摄像机、灯光等
+			//m_Camera.SetPosition({ -0.5f, -0.5f, 0.0f });
+			m_Camera.SetRotation(45);
 
-			m_Shader->Bind();
-			Renderer::Submit(m_VertexArray);
+			Renderer::BeginScene(m_Camera);//摄像机、灯光等
+
+			Renderer::Submit(m_SquareShader, m_SquareVA);
+			Renderer::Submit(m_Shader, m_VertexArray);
 
 			Renderer::EndScene();
 

@@ -22,12 +22,12 @@
 	//断言（如果x表示错误则语句运行，{0}占位的"__VA_ARGS__"代表"..."所输入的语句）
 	#define HZ_CORE_ASSERT(x, ...) \
 		{if(!x){\
-			HZ_CORE_ERROR("Assertion Failed: {0}, __VA_ARGS__");\
+			HZ_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__);\
 			__debugbreak();}\
 		}
 	#define HZ_ASSERT(x, ...)\
 		{if(!x){\
-			HZ_ERROR("Assertion Failed: {0}, __VA_ARGS__");\
+			HZ_ERROR("Assertion Failed: {0}", __VA_ARGS__);\
 			__debugbreak();}\
 		}
 #else
