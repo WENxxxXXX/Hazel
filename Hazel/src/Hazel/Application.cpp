@@ -52,41 +52,24 @@ namespace Hazel
 
 		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 
-		glGenVertexArrays(1, &m_VertexArray);
-		glBindVertexArray(m_VertexArray);
-
-		{	
-			// when we set the layout, we store the layout data in OpenGLBuffer.
-			// m_Layout by "SetLayout()" function, then delete layout.
-			BufferLayout layout =
-			{
-				{ ShaderDataType::Float3, "a_Position" },
-				{ ShaderDataType::Float4, "a_Color" }
-			};
-
-			m_VertexBuffer->SetLayout(layout);
-		}
-		const auto& layout = m_VertexBuffer->GetLayout();
-		// Vertex Attrib 
-		uint32_t index = 0;
-		for (const auto& element : layout)
-		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(
-				index, 
-				element.Count, 
-				element.GLType,
-				element.Normalized ? GL_TRUE : GL_FALSE, 
-				layout.GetStride(), 
-				(const void*)element.Offset);
-			index++;
-		}
-
 		unsigned int indices[3]{
 			0, 1, 2
 		};
 
 		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+
+		m_VertexArray.reset(VertexArray::Create());
+		BufferLayout layout =
+		{
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color" }
+		};
+		// when we set the layout, we store the layout data in OpenGLBuffer.
+		// m_Layout by "SetLayout()" function, then delete layout.
+		m_VertexBuffer->SetLayout(layout);
+
+		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
+		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
 		std::string vertexSrc = R"(
 			#version 330 core
@@ -159,7 +142,7 @@ namespace Hazel
 
 			//»æÖÆÈý½ÇÐÎ
 			m_Shader->Bind();
-			glBindVertexArray(m_VertexArray);
+			m_VertexArray->Bind();
 			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : m_LayerStack)
