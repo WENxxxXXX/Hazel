@@ -37,8 +37,13 @@ namespace Hazel
 		for (const auto& element : layout)
 		{
 			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, element.Count, element.GLType,
-				element.Normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)element.Offset);
+			glVertexAttribPointer(
+				index, 
+				element.Count, 
+				element.GLType,
+				element.Normalized ? GL_TRUE : GL_FALSE, 
+				layout.GetStride(), 
+				(const void*)element.Offset);
 			index++;
 		}
 

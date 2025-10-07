@@ -1,26 +1,28 @@
 #include "hzpch.h"
-#include "VertexArray.h"
+#include "RendererCommand.h"
 
-#include "Hazel/Renderer/Renderer.h"
-#include "Platform/OpenGL/OpenGLVertexArray.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace Hazel
 {
-
-	VertexArray* VertexArray::Create()
-	{
-		switch (Renderer::GetAPI())
+	RendererAPI* RendererAPI::Create() {
+		switch (RendererAPI::GetAPI())
 		{
 		case RendererAPI::API::None: HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported! ")
 			return nullptr;
 		case RendererAPI::API::OpenGL:
-			return new OpenGLVertexArray();
+			return new OpenGLRendererAPI();
 		case RendererAPI::API::DirectX: HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported! ")
 			return nullptr;
 		}
-
 		HZ_CORE_ASSERT(false, "Unknown Renderer API!")
 			return nullptr;
 	}
+
+	RendererAPI* RendererCommand::s_RendererAPI = RendererAPI::Create();
+
+
+	//RendererAPI* RendererCommand::s_RendererAPI = new OpenGLRendererAPI;
+
 
 }

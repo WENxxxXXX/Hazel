@@ -5,33 +5,13 @@
 #include "Hazel/Log.h"
 #include "Hazel/Input.h"
 
-#include <glad/glad.h>
-//#include <GLFW/glfw3.h>
+#include "Hazel/Renderer/Renderer.h"
 
 namespace Hazel
 {
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
-
-	uint32_t GetTypeToGLType(ShaderDataType type) 
-	{
-		switch (type) {
-		case ShaderDataType::Float:		return GL_FLOAT;
-		case ShaderDataType::Float2:	return GL_FLOAT;
-		case ShaderDataType::Float3:	return GL_FLOAT;
-		case ShaderDataType::Float4:	return GL_FLOAT;
-		case ShaderDataType::Int:		return GL_INT;
-		case ShaderDataType::Int2:		return GL_INT;
-		case ShaderDataType::Int3:		return GL_INT;
-		case ShaderDataType::Int4:		return GL_INT;
-		case ShaderDataType::Mat3:		return GL_FLOAT;
-		case ShaderDataType::Mat4:		return GL_FLOAT;
-		case ShaderDataType::Bool:		return GL_BOOL;
-		}
-		HZ_CORE_ASSERT(false, "Unknown ShaderDataType !");
-		return 0;
-	}
 
 	Application::Application()
 	{
@@ -137,13 +117,15 @@ namespace Hazel
 	{
 		while (m_Running)
 		{
-			glClearColor(0.1f, 0.1f, 0.1f, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+			RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+			RendererCommand::Clear();
 
-			//绘制三角形
+			Renderer::BeginScene();//摄像机、灯光等
+
 			m_Shader->Bind();
-			m_VertexArray->Bind();
-			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+			Renderer::Submit(m_VertexArray);
+
+			Renderer::EndScene();
 
 			for (Layer* layer : m_LayerStack)
 			{
