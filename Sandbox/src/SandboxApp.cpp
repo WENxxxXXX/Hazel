@@ -1,7 +1,11 @@
 #include <Hazel.h>
 
-#include "imgui/imgui.h"
+#include "Platform/OpenGL/OpenGLShader.h"
+
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "imgui/imgui.h"
 
 class ExampleLayer : public Hazel::Layer
 {
@@ -17,8 +21,8 @@ public:
 		};
 		unsigned int indices[3] = { 0, 1, 2 };
 
-		std::shared_ptr<Hazel::VertexBuffer> vertexBuffer;
-		std::shared_ptr<Hazel::IndexBuffer> indexBuffer;
+		Hazel::Ref<Hazel::VertexBuffer> vertexBuffer;
+		Hazel::Ref<Hazel::IndexBuffer> indexBuffer;
 		vertexBuffer.reset(Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
 		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 
@@ -66,28 +70,29 @@ public:
 			}
 		)";
 
-		m_Shader.reset(new Hazel::Shader(vertexSrc, fragmentSrc));
+		m_Shader.reset(Hazel::Shader::Create(vertexSrc, fragmentSrc));
 
 		// -------------- Square rendering ----------------
-		float squareVertices[3 * 4] =
+		float squareVertices[5 * 4] =
 		{
-			-0.5f, -0.5f, -0.1f,
-			 0.5f, -0.5f, -0.1f,
-			 0.5f,  0.5f, -0.1f,
-			-0.5f,  0.5f, -0.1f
+			- 0.5f, -0.5f, -0.1f, 0.0f, 0.0f,
+			 0.5f, -0.5f, -0.1f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.1f, 1.0f, 1.0f,
+			-0.5f,  0.5f, -0.1f, 0.0f, 1.0f
 		};
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 
 		m_SquareVA.reset(Hazel::VertexArray::Create());
 
-		std::shared_ptr<Hazel::VertexBuffer> squareVB;
+		Hazel::Ref<Hazel::VertexBuffer> squareVB;
 		squareVB.reset(Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
-		std::shared_ptr<Hazel::IndexBuffer> squareIB;
+		Hazel::Ref<Hazel::IndexBuffer> squareIB;
 		squareIB.reset(Hazel::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
 
 		Hazel::BufferLayout squareLayout =
 		{
-			{Hazel::ShaderDataType::Float3, "a_Position"}
+			{Hazel::ShaderDataType::Float3, "a_Position"},
+			{Hazel::ShaderDataType::Float2, "a_TexCoord"}
 		};
 		squareVB->SetLayout(squareLayout);
 		m_SquareVA->AddVertexBuffer(squareVB);
@@ -111,12 +116,54 @@ public:
 
 			layout(location = 0) out vec4 a_Color;
 
+			uniform vec3 u_Color;
+
 			void main()
 			{
-				a_Color = vec4(0.2, 0.3, 0.8, 1.0);
+				a_Color = vec4(u_Color, 1.0);
 			}
 		)";
-		m_SquareShader.reset(new Hazel::Shader(squareVertexSrc, squareFragSrc));
+		m_SquareShader.reset(Hazel::Shader::Create(squareVertexSrc, squareFragSrc));
+
+		std::string textureVertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+			}
+		)";
+		std::string textureFragSrc = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 Color;
+			
+			in vec2 v_TexCoord;
+
+			uniform sampler2D u_Texture;
+
+			void main()
+			{
+				Color = texture(u_Texture, v_TexCoord);
+			}
+		)";
+		m_TextureShader.reset(Hazel::Shader::Create(
+			textureVertexSrc, textureFragSrc));
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_TextureShader)->
+			Bind();
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_TextureShader)->
+			UpdateUniformInt("u_Texture", 0);
+		m_EmojiTexture = Hazel::Texture2D::Create("assets/textures/emoji.png");
+		m_Texture = Hazel::Texture2D::Create("assets/textures/rain.jpg");
 	}
 
 	void OnUpdate(Hazel::Timestep& ts) override
@@ -142,6 +189,10 @@ public:
 		Hazel::Renderer::BeginScene(m_Camera);
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		//std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_SquareShader)->Bind();
+		m_SquareShader->Bind();//调用虚函数
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_SquareShader)->UpdateUniformFloat3("u_Color", m_SquareColor);
+		//m_SquareShader->UpdateUniformFloat3("u_Color", m_SquareColor);//基类没有这个函数，需要转换
 		for (int y = 0; y < 20; y++) 
 		{
 			for (int x = 0; x < 20; x++) 
@@ -153,67 +204,47 @@ public:
 			}
 		}
 
-		Hazel::Renderer::Submit(m_Shader, m_VertexArray, glm::mat4(1.0f));
+		m_Texture->Bind();
+		Hazel::Renderer::Submit(m_TextureShader, m_SquareVA,
+			glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		m_EmojiTexture->Bind();
+		Hazel::Renderer::Submit(m_TextureShader, m_SquareVA,
+			glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		
 
 		Hazel::Renderer::EndScene();
 	}
 
 	virtual void OnImGuiRender() override
 	{
-		//链接错误
 		ImGui::Begin("Test");
-		ImGui::Text("Hello World");
+		ImGui::ColorEdit3("Square Color Edit", glm::value_ptr(m_SquareColor));
+		//ImGui::ColorEdit3("Square Color Edit", &m_SquareColor[0]);//与上句等效
         const char* text = R"(
-                             ...----....
-                         ..-:"''         ''"-..
-                      .-'                      '-.
-                    .'              .     .       '.
-                  .'   .          .    .      .    .''.
-                .'  .    .       .   .   .     .   . ..:.
-              .' .   . .  .       .   .   ..  .   . ....::.
-             ..   .   .      .  .    .     .  ..  . ....:IA.
-            .:  .   .    .    .  .  .    .. .  .. .. ....:IA.
-           .: .   .   ..   .    .     . . .. . ... ....:.:VHA.
-           '..  .  .. .   .       .  . .. . .. . .....:.::IHHB.
-          .:. .  . .  . .   .  .  . . . ...:.:... .......:HIHMM.
-         .:.... .   . ."::"'.. .   .  . .:.:.:II;,. .. ..:IHIMMA
-         ':.:..  ..::IHHHHHI::. . .  ...:.::::.,,,. . ....VIMMHM
-        .:::I. .AHHHHHHHHHHAI::. .:...,:IIHHHHHHMMMHHL:. . VMMMM
-       .:.:V.:IVHHHHHHHMHMHHH::..:" .:HIHHHHHHHHHHHHHMHHA. .VMMM.
-       :..V.:IVHHHHHMMHHHHHHHB... . .:VPHHMHHHMMHHHHHHHHHAI.:VMMI
-       ::V..:VIHHHHHHMMMHHHHHH. .   .I":IIMHHMMHHHHHHHHHHHAPI:WMM
-       ::". .:.HHHHHHHHMMHHHHHI.  . .:..I:MHMMHHHHHHHHHMHV:':H:WM
-       :: . :.::IIHHHHHHMMHHHHV  .ABA.:.:IMHMHMMMHMHHHHV:'. .IHWW
-       '.  ..:..:.:IHHHHHMMHV" .AVMHMA.:.'VHMMMMHHHHHV:' .  :IHWV
-        :.  .:...:".:.:TPP"   .AVMMHMMA.:. "VMMHHHP.:... .. :IVAI
-       .:.   '... .:"'   .   ..HMMMHMMMA::. ."VHHI:::....  .:IHW'
-       ...  .  . ..:IIPPIH: ..HMMMI.MMMV:I:.  .:ILLH:.. ...:I:IM
-     : .   .'"' .:.V". .. .  :HMMM:IMMMI::I. ..:HHIIPPHI::'.P:HM.
-     :.  .  .  .. ..:.. .    :AMMM IMMMM..:...:IV":T::I::.".:IHIMA
-     'V:.. .. . .. .  .  .   'VMMV..VMMV :....:V:.:..:....::IHHHMH
-       "IHH:.II:.. .:. .  . . . " :HB"" . . ..PI:.::.:::..:IHHMMV"
-        :IP""HHII:.  .  .    . . .'V:. . . ..:IH:.:.::IHIHHMMMMM"
-        :V:. VIMA:I..  .     .  . .. . .  .:.I:I:..:IHHHHMMHHMMM
-        :"VI:.VWMA::. .:      .   .. .:. ..:.I::.:IVHHHMMMHMMMMI
-        :."VIIHHMMA:.  .   .   .:  .:.. . .:.II:I:AMMMMMMHMMMMMI
-        :..VIHIHMMMI...::.,:.,:!"I:!"I!"I!"V:AI:VAMMMMMMHMMMMMM'
-        ':.:HIHIMHHA:"!!"I.:AXXXVVXXXXXXXA:."HPHIMMMMHHMHMMMMMV
-          V:H:I:MA:W'I :AXXXIXII:IIIISSSSSSXXA.I.VMMMHMHMMMMMM
-            'I::IVA ASSSSXSSSSBBSBMBSSSSSSBBMMMBS.VVMMHIMM'"'
-             I:: VPAIMSSSSSSSSSBSSSMMBSSSBBMMMMXXI:MMHIMMI
-            .I::. "H:XIIXBBMMMMMMMMMMMMMMMMMBXIXXMMPHIIMM'
-            :::I.  ':XSSXXIIIIXSSBMBSSXXXIIIXXSMMAMI:.IMM
-            :::I:.  .VSSSSSISISISSSBII:ISSSSBMMB:MI:..:MM
-            ::.I:.  ':"SSSSSSSISISSXIIXSSSSBMMB:AHI:..MMM.
-            ::.I:. . ..:"BBSSSSSSSSSSSSBBBMMMB:AHHI::.HMMI
-            :..::.  . ..::":BBBBBSSBBBMMMB:MMMMHHII::IHHMI
-            ':.I:... ....:IHHHHHMMMMMMMMMMMMMMMHHIIIIHMMV"
-              "V:. ..:...:.IHHHMMMMMMMMMMMMMMMMHHHMHHMHP'
-               ':. .:::.:.::III::IHHHHMMMMMHMHMMHHHHM"
-                 "::....::.:::..:..::IIIIIHHHHMMMHHMV"
-                   "::.::.. .. .  ...:::IIHHMMMMHMV"
-                     "V::... . .I::IHHMMV"'
-                       '"VHVHHHAHHHHMMV:"'
+                         ...----....
+                  .-'                  ''
+                   .          .    .    .''.
+             .' . .  .       .   .   .. ....::.
+            .  .    .    .  .  .    .... ....:IA.
+           '.  . .   .       .  . .. .....:.::IHHB.
+         .:... . ."::"'.. .   .  . .:.. .. ..:IHIMMA
+        .:::I .AHHHHHHAI::. .:...,:IIHMHHL:. . VMMMM
+       :..V.:VHHHHHHHHHHB... . .:VPHHMHHHHHHHAI.:VMMI
+       ::". ..HHHHMMHHHHHI.  . .:..I:MHHHHHMHV:':H:WM
+       '.  ....:.HHHMMHV" .AVMHMA.:.'VHHHV:' .  :IHWV
+       .:.   ...    .   ..HMMMHMMMA::.:::....  .:IHW'
+     : .   .'' .: .. .  :HMMM:IMMMI::IIIPPHI::'.P:HM.
+     'V:.. ... ...  .   'VMMV..VMMV :.:..:....::IHHHH
+        :IP""HII:  .    . . .'V:. . . :.::IHIHHMMMMM"
+        :"VI:VWMA.:      .   .. .:. ..IVHHHMMMHMMMMI
+        :..VIIHMM.::.,:.,:!"I:!"I!"I!"MMMMMMHMMMMMM'
+          V:HI:MA :AXXXIXII:IIIISSSSSSMMMHMHMMMMMM
+             :: VSSSSSSSSSBSSSMMBSSSBB:MMHIMMI
+            ::I. SSXXIIIIXSSBMBSSXXXIIMI:.IMM
+            :.I:."SSSSSSSISISSXIIXSSSSI:..MMM.
+              "V::...:.IHHHMMMMMMMMMMMMMHHMHP'
+                 ...::.:::..:..::IIIIIHHMV"
+                     "V::... . .I::IHHV"'
 		)";
         ImGui::Text(text);
 		ImGui::End();
@@ -225,11 +256,16 @@ public:
 	}
 
 private:
-	std::shared_ptr<Hazel::Shader> m_Shader;
-	std::shared_ptr<Hazel::VertexArray> m_VertexArray;
+	Hazel::Ref<Hazel::Shader> m_Shader;
+	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
 
-	std::shared_ptr<Hazel::Shader> m_SquareShader;
-	std::shared_ptr<Hazel::VertexArray> m_SquareVA;
+	Hazel::Ref<Hazel::Shader> m_TextureShader;
+	Hazel::Ref<Hazel::Texture2D> m_Texture, m_EmojiTexture;
+
+	Hazel::Ref<Hazel::Shader> m_SquareShader;
+	Hazel::Ref<Hazel::VertexArray> m_SquareVA;
+
+	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
 
 	Hazel::OrthoGraphicCamera m_Camera;
 

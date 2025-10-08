@@ -10,6 +10,13 @@ namespace Hazel
 	public:
 		// static variable frmm Create(), which returns virtual funcs already overrided in Platform
 		// So bind the functions form corresponding interface in OpenGL/DirectX/Metal/Valkan
+		
+		
+		inline static void Init()
+		{
+			s_RendererAPI->Init();
+		}
+		
 		inline static void Clear()
 		{
 			s_RendererAPI->Clear();
@@ -19,7 +26,7 @@ namespace Hazel
 			s_RendererAPI->SetClearColor(color);
 		}
 
-		inline static void DrawIndexed(const std::shared_ptr<VertexArray>& vertexArray)
+		inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
 		{
 			s_RendererAPI->DrawIndexed(vertexArray);
 		}

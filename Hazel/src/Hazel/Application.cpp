@@ -7,6 +7,8 @@
 #include "Hazel/Log.h"
 #include "Hazel/Input.h"
 
+#include "Hazel/Renderer/Renderer.h"
+
 namespace Hazel
 {
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
@@ -20,7 +22,8 @@ namespace Hazel
 
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));//如果子类重写了OnEvent函数，则以子类为准
-		m_Window->SetVSync(true);
+		
+		Renderer::Init();
 		
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
