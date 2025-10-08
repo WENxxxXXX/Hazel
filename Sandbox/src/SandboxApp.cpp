@@ -70,7 +70,7 @@ public:
 			}
 		)";
 
-		m_Shader.reset(Hazel::Shader::Create(vertexSrc, fragmentSrc));
+		m_Shader = Hazel::Shader::Create("TriangleShader", vertexSrc, fragmentSrc);
 
 		// -------------- Square rendering ----------------
 		float squareVertices[5 * 4] =
@@ -98,39 +98,12 @@ public:
 		m_SquareVA->AddVertexBuffer(squareVB);
 		m_SquareVA->SetIndexBuffer(squareIB);
 
-		std::string squareVertexSrc = R"(
-			#version 330 core
-			
-			layout(location = 0) in vec3 a_Position;
+		m_SquareShader = Hazel::Shader::Create("assets/shaders/SquarePosShader.glsl");
+		auto textureShader = m_ShaderLibrary.Load("assets/shaders/TextureShader.glsl");
 
-			uniform mat4 u_ViewProjection;
-			uniform mat4 u_Transform;
-
-			void main()
-			{
-				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
-			}
-		)";
-		std::string squareFragSrc = R"(
-			#version 330 core
-
-			layout(location = 0) out vec4 a_Color;
-
-			uniform vec3 u_Color;
-
-			void main()
-			{
-				a_Color = vec4(u_Color, 1.0);
-			}
-		)";
-		m_SquareShader.reset(Hazel::Shader::Create(squareVertexSrc, squareFragSrc));
-
-		/*m_TextureShader.reset(Nut::Shader::Create(textureVertexSrc, textureFragSrc));*/
-		m_TextureShader.reset(Hazel::Shader::Create("assets/shaders/TextureShader.glsl"));
-
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_TextureShader)->
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(textureShader)->
 			Bind();
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_TextureShader)->
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(textureShader)->
 			UpdateUniformInt("u_Texture", 0);
 		m_EmojiTexture = Hazel::Texture2D::Create("assets/textures/emoji.png");
 		m_Texture = Hazel::Texture2D::Create("assets/textures/rain.jpg");
@@ -174,11 +147,12 @@ public:
 			}
 		}
 
+		auto textureShader = m_ShaderLibrary.Get("TextureShader");
 		m_Texture->Bind();
-		Hazel::Renderer::Submit(m_TextureShader, m_SquareVA,
+		Hazel::Renderer::Submit(textureShader, m_SquareVA,
 			glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		m_EmojiTexture->Bind();
-		Hazel::Renderer::Submit(m_TextureShader, m_SquareVA,
+		Hazel::Renderer::Submit(textureShader, m_SquareVA,
 			glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 		
 
@@ -227,9 +201,9 @@ public:
 
 private:
 	Hazel::Ref<Hazel::Shader> m_Shader;
+	Hazel::ShaderLibrary m_ShaderLibrary;
 	Hazel::Ref<Hazel::VertexArray> m_VertexArray;
 
-	Hazel::Ref<Hazel::Shader> m_TextureShader;
 	Hazel::Ref<Hazel::Texture2D> m_Texture, m_EmojiTexture;
 
 	Hazel::Ref<Hazel::Shader> m_SquareShader;
