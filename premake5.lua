@@ -10,6 +10,11 @@ workspace "Hazel"
         "Dist" 
     }
 
+    flags                           --设置编译器选项
+	{
+		"MultiProcessorCompile"     --多处理器并行编译
+	}
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"--（方便输出和中间目录编写）
 
 -- 包含相对根目录（解决方案目录）的目录
