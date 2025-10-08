@@ -26,7 +26,7 @@ namespace Hazel {
 	{
 		auto iter = std::find(m_Layers.begin(), 
 			m_Layers.begin() + m_LayerInsertIndex, layer);
-		if (iter != m_Layers.end())
+		if (iter != m_Layers.begin() + m_LayerInsertIndex)
 		{
 			layer->OnDetach();
 			m_Layers.erase(iter);

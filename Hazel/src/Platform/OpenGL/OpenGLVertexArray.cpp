@@ -32,19 +32,18 @@ namespace Hazel
 		glBindVertexArray(m_RendererID);
 		vertexbuffer->Bind();
 		// Vertex Attrib 
-		uint32_t index = 0;
 		const auto& layout = vertexbuffer->GetLayout();
 		for (const auto& element : layout)
 		{
-			glEnableVertexAttribArray(index);
+			glEnableVertexAttribArray(m_VertexBufferIndex);
 			glVertexAttribPointer(
-				index, 
+				m_VertexBufferIndex,
 				element.Count, 
 				element.GLType,
 				element.Normalized ? GL_TRUE : GL_FALSE, 
 				layout.GetStride(), 
-				(const void*)element.Offset);
-			index++;
+				(const void*)(intptr_t)element.Offset);//(intptr_t) 是一种足够大的整数类型，先将Offset转换成了整数型。
+			m_VertexBufferIndex++;
 		}
 
 		m_VertexBuffers.push_back(vertexbuffer);
