@@ -11,8 +11,7 @@ class ExampleLayer : public Hazel::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Exampler Layer"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), 
-		m_CameraPosition(0.0f), m_CameraRotation(0.0f)
+		: Layer("Exampler Layer"), m_CameraController(1280.0f / 720.0f, true)
 	{
 		float vertices[3 * 7] = {
 				-0.5f, -0.5f, 0.0f, 1.0f, 0.2f, 0.8f, 1.0f,
@@ -111,25 +110,14 @@ public:
 
 	void OnUpdate(Hazel::Timestep& ts) override
 	{
+		// Update
+		m_CameraController.OnUpdate(ts);
+
+		// Render
 		Hazel::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Hazel::RendererCommand::Clear();
 
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_D))
-			m_CameraPosition.x -= m_CameraMoveSpeed * ts;
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_A))
-			m_CameraPosition.x += m_CameraMoveSpeed * ts;
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_W))
-			m_CameraPosition.y -= m_CameraMoveSpeed * ts;
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_S))
-			m_CameraPosition.y += m_CameraMoveSpeed * ts;
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_Q))
-			m_CameraRotation -= m_CameraRotateSpeed * ts;
-		if (Hazel::Input::IsKeyPressed(HZ_KEY_E))
-			m_CameraRotation += m_CameraRotateSpeed * ts;
-
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
-		Hazel::Renderer::BeginScene(m_Camera);
+		Hazel::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		//std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_SquareShader)->Bind();
@@ -196,7 +184,7 @@ public:
 
 	void OnEvent(Hazel::Event& event) override
 	{
-
+		m_CameraController.OnEvent(event);
 	}
 
 private:
@@ -211,12 +199,8 @@ private:
 
 	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
 
-	Hazel::OrthoGraphicCamera m_Camera;
-
-	glm::vec3 m_CameraPosition;
-	float m_CameraMoveSpeed = 2.0f;
-	float m_CameraRotation;
-	float m_CameraRotateSpeed = 180.0f;
+	//Hazel::OrthoGraphicCamera m_Camera;
+	Hazel::OrthoGraphicCameraController m_CameraController;
 };
 
 class Sandbox : public Hazel::Application
