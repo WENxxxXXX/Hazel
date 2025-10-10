@@ -42,10 +42,11 @@ namespace Hazel
 		m_LayerStack.PushOverLay(layer);
 	}
 
-	void Application::OnEvent(Event& e)
+	void Application::OnEvent(Event& e)//Application中创建窗口时，将此函数设为回调函数
 	{
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
 
 		//HZ_CORE_TRACE("{0}", e.ToString());
 
@@ -67,9 +68,9 @@ namespace Hazel
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			for (Layer* layer : m_LayerStack)
-			{
-				layer->OnUpdate(timestep);//执行逻辑更新(更新应用程序的逻辑状态）
+			if (!m_Minimized) {//应用最小化时，不处理事件
+				for (Layer* layer : m_LayerStack)				//更新图层
+					layer->OnUpdate(timestep);					//执行逻辑更新(更新应用程序的逻辑状态）
 			}
 
 			m_ImGuiLayer->Begin();
@@ -87,6 +88,19 @@ namespace Hazel
 	{
 		m_Running = false;
 		return true;
+	}
+
+	bool Application::OnWindowResize(WindowResizeEvent& event)
+	{
+		m_Minimized = false;
+		Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
+		return false;
+
+		if (event.GetWidth() == 0 && event.GetHeight() == 0)
+		{
+			m_Minimized = true;
+			return false;
+		}
 	}
 }
 
