@@ -5,7 +5,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 
-#include "Hazel/Application.h"
+#include "Hazel/Core/Application.h"
 
 //暂时先这样
 #include <glad/glad.h>

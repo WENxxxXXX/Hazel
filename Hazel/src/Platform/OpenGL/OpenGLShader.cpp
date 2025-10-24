@@ -172,7 +172,10 @@ namespace Hazel
 			return;
 		}
 		for (auto shader : glShaders)
+		{
 			glDetachShader(m_RendererID, shader);
+			glDeleteShader(shader);
+		}
 	}
 
 	void OpenGLShader::UpdateUniformInt(const std::string& name, const int& value)

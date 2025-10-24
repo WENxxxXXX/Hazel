@@ -1,4 +1,6 @@
 #include <Hazel.h>
+#include "Hazel/Core/EntryPoint.h"
+#include "Sandbox2D.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -25,13 +27,13 @@ public:
 		vertexBuffer.reset(Hazel::VertexBuffer::Create(vertices, sizeof(vertices)));
 		indexBuffer.reset(Hazel::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 
-		m_VertexArray.reset(Hazel::VertexArray::Create());
+		m_VertexArray = Hazel::VertexArray::Create();
 		Hazel::BufferLayout layout =
 		{
 			{ Hazel::ShaderDataType::Float3, "a_Position" },
 			{ Hazel::ShaderDataType::Float4, "a_Color" }
 		};
-		vertexBuffer->SetLayout(layout);												// when we set the layout, we store the layout data in OpenGLBuffer.m_Layout by "SetLayout()" function, then delete layout.
+		vertexBuffer->SetLayout(layout);// when we set the layout, we store the layout data in OpenGLBuffer.m_Layout by "SetLayout()" function, then delete layout.
 
 		m_VertexArray->AddVertexBuffer(vertexBuffer);
 		m_VertexArray->SetIndexBuffer(indexBuffer);
@@ -81,7 +83,7 @@ public:
 		};
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 
-		m_SquareVA.reset(Hazel::VertexArray::Create());
+		m_SquareVA = Hazel::VertexArray::Create();
 
 		Hazel::Ref<Hazel::VertexBuffer> squareVB;
 		squareVB.reset(Hazel::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
@@ -108,7 +110,7 @@ public:
 		m_Texture = Hazel::Texture2D::Create("assets/textures/rain.jpg");
 	}
 
-	void OnUpdate(Hazel::Timestep& ts) override
+	void OnUpdate(Hazel::Timestep ts) override
 	{
 		// Update
 		m_CameraController.OnUpdate(ts);
@@ -208,7 +210,8 @@ class Sandbox : public Hazel::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExampleLayer());
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox()
