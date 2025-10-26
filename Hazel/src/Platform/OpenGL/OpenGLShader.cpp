@@ -66,6 +66,7 @@ namespace Hazel
 		glUseProgram(0);
 	}
 
+	#pragma region 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
 		std::string result;
@@ -108,6 +109,7 @@ namespace Hazel
 
 		return shaderSources;
 	}
+	#pragma endregion
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
@@ -178,34 +180,56 @@ namespace Hazel
 		}
 	}
 
-	void OpenGLShader::UpdateUniformInt(const std::string& name, const int& value)
+	// -----------------------------------------------------------------------------------------
+	void OpenGLShader::SetInt(const std::string& name, const int& value)
+	{
+		UploadUniformInt(name, value);
+	}
+	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
+	{
+		UploadUniformFloat3(name, value);
+	}
+	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
+	{
+		UploadUniformFloat4(name, value);
+	}
+	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
+	{
+		UploadUniformMat3(name, value);
+	}
+	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
+	{
+		UploadUniformMat4(name, value);
+	}
+	// -------------------------------------------------------------------------------------------
+	void OpenGLShader::UploadUniformInt(const std::string& name, const int& value)
 	{
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::UpdateUniformFloat(const std::string& name, const float& value) {
+	void OpenGLShader::UploadUniformFloat(const std::string& name, const float& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform1f(location, value);
 	}
-	void OpenGLShader::UpdateUniformFloat2(const std::string& name, const glm::vec2& value) {
+	void OpenGLShader::UploadUniformFloat2(const std::string& name, const glm::vec2& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform2f(location, value.x, value.y);
 	}
-	void OpenGLShader::UpdateUniformFloat3(const std::string& name, const glm::vec3& value) {
+	void OpenGLShader::UploadUniformFloat3(const std::string& name, const glm::vec3& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform3f(location, value.x, value.y, value.z);
 	}
-	void OpenGLShader::UpdateUniformFloat4(const std::string& name, const glm::vec4& value) {
+	void OpenGLShader::UploadUniformFloat4(const std::string& name, const glm::vec4& value) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
-	void OpenGLShader::UpdateUniformMat3(const std::string& name, const glm::mat3& matrix) {
+	void OpenGLShader::UploadUniformMat3(const std::string& name, const glm::mat3& matrix) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
-	void OpenGLShader::UpdateUniformMat4(const std::string& name, const glm::mat4& matrix) {
+	void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& matrix) {
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
 	}

@@ -82,9 +82,9 @@ project "Hazel"
         systemversion "latest"  --windows SDK 版本
         defines                 --宏的声明
         {
-            "HZ_PLATFORM_WINDOWS",
+            --"HZ_PLATFORM_WINDOWS",
             "HZ_BUILD_DLL",
-            --"GLFW_INCLUDE_NONE"
+            "GLFW_INCLUDE_NONE"
         }
         outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}" 
         postbuildcommands       --构建项目完成后执行的指令
@@ -144,7 +144,7 @@ project "Sandbox"
 
         defines
         {
-            "HZ_PLATFORM_WINDOWS"
+            --"HZ_PLATFORM_WINDOWS"
         }
 
         buildoptions "/utf-8"

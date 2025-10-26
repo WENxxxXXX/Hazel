@@ -26,6 +26,6 @@ namespace Hazel
 		virtual float GetMouseYImpl() = 0;
 		virtual std::pair<float, float> GetMousePositionImpl() = 0;
 	private:
-		static Input* s_Instance;
+		static Scope<Input> s_Instance;//在WindowsInput.cpp中初始化（静态成员变量必须被定义或初始化）
 	};
 }

@@ -59,7 +59,7 @@ namespace Hazel {
 		//int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		//HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-		m_Context = new OpenGLContext(m_Window);
+		m_Context = CreateScope<OpenGLContext>(m_Window);
 		m_Context->Init();
 
 		/*用来将自定义的指针数据与窗口对象相关联；这样做的目的通常是为了在程序中

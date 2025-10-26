@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "imgui/imgui.h"
+#include <Hazel/Renderer/Renderer.h>
 
 class ExampleLayer : public Hazel::Layer
 {
@@ -99,13 +100,13 @@ public:
 		m_SquareVA->AddVertexBuffer(squareVB);
 		m_SquareVA->SetIndexBuffer(squareIB);
 
-		m_SquareShader = Hazel::Shader::Create("assets/shaders/SquarePosShader.glsl");
+		m_SquareShader = Hazel::Shader::Create("assets/shaders/FlatColorShader.glsl");
 		auto textureShader = m_ShaderLibrary.Load("assets/shaders/TextureShader.glsl");
 
 		std::dynamic_pointer_cast<Hazel::OpenGLShader>(textureShader)->
 			Bind();
 		std::dynamic_pointer_cast<Hazel::OpenGLShader>(textureShader)->
-			UpdateUniformInt("u_Texture", 0);
+			UploadUniformInt("u_Texture", 0);
 		m_EmojiTexture = Hazel::Texture2D::Create("assets/textures/emoji.png");
 		m_Texture = Hazel::Texture2D::Create("assets/textures/rain.jpg");
 	}
@@ -124,7 +125,8 @@ public:
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		//std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_SquareShader)->Bind();
 		m_SquareShader->Bind();//调用虚函数
-		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_SquareShader)->UpdateUniformFloat3("u_Color", m_SquareColor);
+		std::dynamic_pointer_cast<Hazel::OpenGLShader>(m_SquareShader)->
+			UploadUniformFloat4("u_Color", m_SquareColor);
 		//m_SquareShader->UpdateUniformFloat3("u_Color", m_SquareColor);//基类没有这个函数，需要转换
 		for (int y = 0; y < 20; y++) 
 		{
@@ -199,7 +201,7 @@ private:
 	Hazel::Ref<Hazel::Shader> m_SquareShader;
 	Hazel::Ref<Hazel::VertexArray> m_SquareVA;
 
-	glm::vec3 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f };
+	glm::vec4 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };
 
 	//Hazel::OrthoGraphicCamera m_Camera;
 	Hazel::OrthoGraphicCameraController m_CameraController;
