@@ -23,6 +23,8 @@ namespace Hazel
 
 	OpenGLShader::OpenGLShader(const std::string& filepath) 
 	{
+		HZ_PROFILE_FUNCTION();
+
 		// Get Shader code
 		std::string source = ReadFile(filepath);
 		std::unordered_map<GLenum, std::string> shaderSources = PreProcess(source);
@@ -45,6 +47,8 @@ namespace Hazel
 		const std::string& vertexSrc, const std::string& fragmentSrc)
 		:m_Name(name)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 		shaderSources[GL_VERTEX_SHADER] = vertexSrc;
 		shaderSources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -53,22 +57,30 @@ namespace Hazel
 
 	OpenGLShader::~OpenGLShader()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glDeleteProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Bind() const
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glUseProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Unbind() const
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glUseProgram(0);
 	}
 
 	#pragma region 
 	std::string OpenGLShader::ReadFile(const std::string& filepath)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		std::string result;
 		std::ifstream readIn(filepath, std::ios::in | std::ios::binary);
 		if (readIn)
@@ -88,6 +100,8 @@ namespace Hazel
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 		const char* token = "#type";
 		size_t tokenLength = strlen(token);
@@ -113,6 +127,8 @@ namespace Hazel
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_RendererID = glCreateProgram();
 		//std::vector<GLuint> glShaders(shaderSources.size());
 		HZ_CORE_ASSERT((shaderSources.size() <= 2), 
@@ -180,28 +196,34 @@ namespace Hazel
 		}
 	}
 
-	// -----------------------------------------------------------------------------------------
+	// ----------------Overrided from Shader(Parent class)-------------------
 	void OpenGLShader::SetInt(const std::string& name, const int& value)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		UploadUniformInt(name, value);
 	}
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformFloat3(name, value);
 	}
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformFloat4(name, value);
 	}
 	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformMat3(name, value);
 	}
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
+		HZ_PROFILE_FUNCTION();
 		UploadUniformMat4(name, value);
 	}
-	// -------------------------------------------------------------------------------------------
+	// ----------------------Native in Subclasses---------------------
 	void OpenGLShader::UploadUniformInt(const std::string& name, const int& value)
 	{
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());

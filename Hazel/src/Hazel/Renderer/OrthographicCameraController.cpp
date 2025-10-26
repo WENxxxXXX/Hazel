@@ -14,6 +14,8 @@ namespace Hazel {
 
 	void OrthoGraphicCameraController::OnUpdate(Timestep& ts)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		if (m_Rotation) {
 			if (Input::IsKeyPressed(HZ_KEY_Q))
 				m_CameraRotation -= m_CameraRotationSpeed * ts;
@@ -64,6 +66,8 @@ namespace Hazel {
 
 	void OrthoGraphicCameraController::OnEvent(Event& e)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		EventDispatcher dispathcer(e);
 		dispathcer.Dispatch<MouseScrolledEvent>(HZ_BIND_EVENT_FN(OrthoGraphicCameraController::OnMouseScrolled));
 		dispathcer.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OrthoGraphicCameraController::OnWindowResized));
@@ -71,6 +75,8 @@ namespace Hazel {
 
 	bool OrthoGraphicCameraController::OnMouseScrolled(MouseScrolledEvent e)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_ZoomLevel -= e.GetYOffset() * 0.5f;//Offset 在向前滚动时通常为负数，向后滚动时通常为正数
 		m_ZoomLevel = std::max(m_ZoomLevel, 0.25f);
 		m_Camera.SetProjectionMatrix(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
@@ -79,6 +85,8 @@ namespace Hazel {
 
 	bool OrthoGraphicCameraController::OnWindowResized(WindowResizeEvent e)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_AspectRatio = (float)e.GetWidth() / (float)e.GetHeight();//设置回调的宽高比
 		m_Camera.SetProjectionMatrix(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel);
 		return false;

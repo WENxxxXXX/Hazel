@@ -25,16 +25,22 @@ namespace Hazel {
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
@@ -43,6 +49,8 @@ namespace Hazel {
 
 		if (!s_GLFWInitialized)
 		{
+			HZ_PROFILE_SCOPE("glfwInitWindow");
+
 			int success = glfwInit();// 通常情况下，glfwInit() 函数会返回一个整数值来指示初始化是否成功。
 			HZ_CORE_ASSERT(success, "Could not initialize GLFW!");
 
@@ -51,7 +59,12 @@ namespace Hazel {
 		}
 
 		//初始化Windows对象并创建窗口上下文
-		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		{
+			HZ_PROFILE_SCOPE("glfwCreateWindow");
+			//初始化Windows对象并创建窗口上下文
+			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, 
+				m_Data.Title.c_str(), nullptr, nullptr);
+		}
 		
 		//opengl+glfw上下文，不能扩展
 		//glfwMakeContextCurrent(m_Window);
@@ -157,11 +170,15 @@ namespace Hazel {
 
 	void WindowsWindow::Shutdown()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glfwDestroyWindow(m_Window);
 	}
 
 	void WindowsWindow::OnUpdate()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		glfwPollEvents();
 		//glfwSwapBuffers(m_Window);
 		m_Context->SwapBuffers();
@@ -169,6 +186,8 @@ namespace Hazel {
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		if (enabled)
 			glfwSwapInterval(1);
 		else

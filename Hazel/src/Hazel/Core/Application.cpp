@@ -17,6 +17,8 @@ namespace Hazel
 
 	Application::Application()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		HZ_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
@@ -35,16 +37,24 @@ namespace Hazel
 
 	void Application::PushLayer(Layer* layer)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_LayerStack.PushLayer(layer);
+		layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* layer)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_LayerStack.PushOverLay(layer);
+		layer->OnAttach();
 	}
 
 	void Application::OnEvent(Event& e)//Application中创建窗口时，将此函数设为回调函数
 	{
+		HZ_PROFILE_FUNCTION();
+
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
 		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
@@ -63,25 +73,33 @@ namespace Hazel
 
 	void Application::Run()
 	{
+		HZ_PROFILE_FUNCTION();
+
 		while (m_Running)
 		{
+			HZ_PROFILE_SCOPE("RunLoop");
+
 			float time = (float)glfwGetTime();
 			Timestep timestep = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			if (!m_Minimized) {//应用最小化时，不处理事件
-				for (Layer* layer : m_LayerStack)				//更新图层
-					layer->OnUpdate(timestep);					//执行逻辑更新(更新应用程序的逻辑状态）
-			}
-
-			m_ImGuiLayer->Begin();
-			for (Layer* layer : m_LayerStack)
+			if (!m_Minimized)
 			{
-				layer->OnImGuiRender();
-			}
-			m_ImGuiLayer->End();
+				{
+					HZ_PROFILE_SCOPE("LayerStack OnUpdate");
 
-			m_Window->OnUpdate();
+					for (Layer* layer : m_LayerStack)//更新图层
+						layer->OnUpdate(timestep);//执行图层逻辑更新(更新应用程序的逻辑状态）
+				}
+				m_ImGuiLayer->Begin();
+				{
+					HZ_PROFILE_SCOPE("LayerStack OnImGuiRender");
+					for (Layer* layer : m_LayerStack)
+						layer->OnImGuiRender();//进行图层实际渲染操作（逻辑更新后才能进行的渲染操作）
+				}
+				m_ImGuiLayer->End();
+			}
+			m_Window->OnUpdate();//更新窗口
 		}
 	}
 	
@@ -93,6 +111,8 @@ namespace Hazel
 
 	bool Application::OnWindowResize(WindowResizeEvent& event)
 	{
+		HZ_PROFILE_FUNCTION();
+
 		m_Minimized = false;
 		Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
 		return false;
