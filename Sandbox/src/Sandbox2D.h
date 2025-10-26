@@ -2,7 +2,7 @@
 
 #include "Hazel.h"
 
-#include "Platform/OpenGL/OpenGLShader.h"
+#include "Hazel/Renderer/Texture.h"
 
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -21,8 +21,7 @@ public:
 	void OnImGuiRender() override;
 	void OnEvent(Hazel::Event& event) override;
 private:
-	Hazel::Ref<Hazel::Shader> m_SquareShader;
-	Hazel::Ref<Hazel::VertexArray> m_SquareVA;
+	Hazel::Ref<Hazel::Texture2D> m_Texture;
 	Hazel::OrthoGraphicCameraController m_CameraController;
 
 	glm::vec4 m_SquareColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };

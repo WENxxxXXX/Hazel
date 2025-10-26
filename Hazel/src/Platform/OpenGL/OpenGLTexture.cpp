@@ -32,10 +32,12 @@ namespace Hazel
 		HZ_CORE_ASSERT(internalFormat & dataFormat, "Format not supported!")
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height);			//gl func need unsigned int data So we assign the value of width to m_Width
+		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height);//gl func need unsigned int data So we assign the value of width to m_Width
 
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);//纹理环绕模式
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, 
 			dataFormat, GL_UNSIGNED_BYTE, data);
 		stbi_image_free(data);
