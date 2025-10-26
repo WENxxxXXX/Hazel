@@ -21,6 +21,7 @@ namespace Hazel
 		s_Instance = this;
 
 		m_Window = std::unique_ptr<Window>(Window::Create());
+		//m_Window->SetVSync(false);
 		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));//如果子类重写了OnEvent函数，则以子类为准
 		
 		Renderer::Init();
