@@ -1,7 +1,7 @@
 --[[  关于premake中的token（符记）： https://premake.github.io/docs/Tokens/  ]]
 
 workspace "Hazel"
-    architecture "x64"
+    architecture "x86_64"
     startproject "Sandbox"          --[[启动项目]]
     configurations 
     { 

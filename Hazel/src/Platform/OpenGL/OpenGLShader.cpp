@@ -1,5 +1,5 @@
 #include "hzpch.h"
-#include "OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -86,11 +86,17 @@ namespace Hazel
 		if (readIn)
 		{
 			readIn.seekg(0, std::ios::end);
-			result.resize(readIn.tellg());
+			size_t size = readIn.tellg();
 
-			readIn.seekg(0, std::ios::beg);
-			readIn.read(&result[0], result.size());
-			readIn.close();
+			if (size != -1) {//是否成功获取
+				result.resize(size);
+				readIn.seekg(0, std::ios::beg);
+				readIn.read(&result[0], size);
+				readIn.close();
+			}
+			else {
+				HZ_CORE_ERROR("Failed to read file from : '{0}'", filepath);
+			}
 		}
 		else {
 			HZ_CORE_ERROR("Could not open file form : '{0}'", filepath);
@@ -204,6 +210,13 @@ namespace Hazel
 		UploadUniformInt(name, value);
 	}
 
+	void OpenGLShader::SetIntArray(const std::string& name, int* values, uint32_t count)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		UploadUniformIntArray(name, values, count);
+	}
+
 	void OpenGLShader::SetFloat(const std::string& name, const float& value)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -236,6 +249,12 @@ namespace Hazel
 	{
 		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform1i(location, value);
+	}
+
+	void OpenGLShader::UploadUniformIntArray(const std::string& name, int* values, uint32_t count)
+	{
+		uint32_t location = glGetUniformLocation(m_RendererID, name.c_str());
+		glUniform1iv(location, count, values);
 	}
 
 	void OpenGLShader::UploadUniformFloat(const std::string& name, const float& value) {

@@ -11,8 +11,6 @@
 
 namespace Hazel
 {
-#define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
-
 	Application* Application::s_Instance = nullptr;
 
 	Application::Application()
@@ -22,9 +20,8 @@ namespace Hazel
 		HZ_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
-		m_Window = std::unique_ptr<Window>(Window::Create());
-		//m_Window->SetVSync(false);
-		m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));//如果子类重写了OnEvent函数，则以子类为准
+		m_Window = Window::Create();
+		m_Window->SetEventCallback(HZ_BIND_EVENT_FN(Application::OnEvent));//如果子类重写了OnEvent函数，则以子类为准
 		
 		Renderer::Init();
 		
@@ -33,6 +30,7 @@ namespace Hazel
 	}
 	Application::~Application()
 	{
+		Renderer::Shutdown();
 	}
 
 	void Application::PushLayer(Layer* layer)
@@ -56,14 +54,15 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
-		dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
+		dispatcher.Dispatch<WindowCloseEvent>(HZ_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(Application::OnWindowResize));
 
 		//HZ_CORE_TRACE("{0}", e.ToString());
 
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin();)
+		//图层的事件处理是反向的（从尾到头），！！！反向迭代器中的 iter 需要使用前置递增（先加后用）
+		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)	
 		{
-			(*--it)->OnEvent(e);
+			(*it)->OnEvent(e);
 			if (e.Handled)
 			{
 				break;

@@ -1,14 +1,40 @@
 #include "hzpch.h"
-#include "OpenGLRendererAPI.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 #include <glad/glad.h>
 
 namespace Hazel
 {
 
+	
+	//报错信息回调函数(OpenGLMessageCallback)定义
+	void OpenGLMessageCallback
+	(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam)
+	{
+		switch (severity)
+		{
+		case GL_DEBUG_SEVERITY_HIGH:         HZ_CORE_CRIRICAL(message); return;
+		case GL_DEBUG_SEVERITY_MEDIUM:       HZ_CORE_ERROR(message); return;
+		case GL_DEBUG_SEVERITY_LOW:          HZ_CORE_WARN(message); return;
+		case GL_DEBUG_SEVERITY_NOTIFICATION: HZ_CORE_TRACE(message); return;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown severity level!");
+	}
+
 	void OpenGLRendererAPI::Init()
 	{
 		HZ_PROFILE_FUNCTION();
+
+#ifdef NUT_DEBUG
+		//控制OpenGL生成的调试消息的生成和过滤
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+#endif
+
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -36,5 +62,17 @@ namespace Hazel
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
 		glBindTexture(GL_TEXTURE_2D, 0);//渲染完之后，解绑当前纹理，避免影响到后续物体纹理的渲染
 	}
+
+	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
+	{
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	// Cherno do:
+	//void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount /*= 0*/){
+	//	uint32_t count = indexCount ? vertexArray->GetIndexBuffer()->GetCount() : indexCount;
+	//	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);}
+
 
 }

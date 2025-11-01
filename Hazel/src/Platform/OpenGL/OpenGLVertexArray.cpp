@@ -1,5 +1,5 @@
 #include "hzpch.h"
-#include "OpenGLVertexArray.h"
+#include "Platform/OpenGL/OpenGLVertexArray.h"
 
 #include <glad/glad.h>
 
@@ -52,7 +52,7 @@ namespace Hazel
 				element.GLType,
 				element.Normalized ? GL_TRUE : GL_FALSE, 
 				layout.GetStride(), 
-				(const void*)(intptr_t)element.Offset);//(intptr_t) 是一种足够大的整数类型，先将Offset转换成了整数型。
+				(const void*)element.Offset);//(intptr_t) 是一种足够大的整数类型，先将Offset转换成了整数型。
 			m_VertexBufferIndex++;
 		}
 

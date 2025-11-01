@@ -1,6 +1,6 @@
 #include "hzpch.h"
-#include "Renderer.h"
-#include "Renderer2D.h"
+#include "Hazel/Renderer/Renderer.h"
+#include "Hazel/Renderer/Renderer2D.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -14,6 +14,11 @@ namespace Hazel
 
 		RendererCommand::Init();
 		Renderer2D::Init();
+	}	
+	
+	void Renderer::Shutdown()
+	{
+		Renderer2D::Shutdown();
 	}
 
 	void Renderer::OnWindowResize(uint32_t width, uint32_t height)
@@ -34,10 +39,8 @@ namespace Hazel
 		const Ref<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->Bind();
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4(
-			"u_ViewProjection", s_SceneData->ViewProjectionMatrix);//传入的参数是OpenGLShader类型的，故需要手动转换。
-		std::dynamic_pointer_cast<OpenGLShader>(shader)->UploadUniformMat4(
-			"u_Transform", transform);
+		shader->SetMat4("u_ViewProjection", s_SceneData->ViewProjectionMatrix);//传入的参数是OpenGLShader类型的，故需要手动转换。
+		shader->SetMat4("u_Transform", transform);
 
 		vertexArray->Bind();
 		RendererCommand::DrawIndexed(vertexArray);

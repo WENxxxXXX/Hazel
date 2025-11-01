@@ -1,5 +1,5 @@
 #include "hzpch.h"
-#include "WindowsWindow.h"
+#include "Platform/Windows/WindowsWindow.h"
 #include <Hazel/Core/Log.h>
 
 #include "Hazel/Events/ApplicationEvent.h"
@@ -11,16 +11,11 @@
 
 namespace Hazel {
 
-	static bool s_GLFWInitialized = false;
+	static uint8_t s_GLFWWindowCount = 0;
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
 		HZ_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
-	}
-
-	Window* Window::Create(const WindowProps& props)
-	{
-		return new WindowsWindow(props);
 	}
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
@@ -47,23 +42,30 @@ namespace Hazel {
 
 		HZ_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
 
-		if (!s_GLFWInitialized)
+		if (s_GLFWWindowCount == 0)
 		{
 			HZ_PROFILE_SCOPE("glfwInitWindow");
 
+			HZ_CORE_INFO("Initializing GLFW window..");
 			int success = glfwInit();// 通常情况下，glfwInit() 函数会返回一个整数值来指示初始化是否成功。
 			HZ_CORE_ASSERT(success, "Could not initialize GLFW!");
 
 			glfwSetErrorCallback(GLFWErrorCallback);
-			s_GLFWInitialized = true;
 		}
 
 		//初始化Windows对象并创建窗口上下文
 		{
 			HZ_PROFILE_SCOPE("glfwCreateWindow");
+
+			#ifdef NUT_DEBUG
+				// 启用调试上下文（以便在渲染的过程中通过MessageCallback监测）
+				glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+			#endif
 			//初始化Windows对象并创建窗口上下文
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, 
 				m_Data.Title.c_str(), nullptr, nullptr);
+
+			++s_GLFWWindowCount;
 		}
 		
 		//opengl+glfw上下文，不能扩展
@@ -72,7 +74,7 @@ namespace Hazel {
 		//int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		//HZ_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-		m_Context = CreateScope<OpenGLContext>(m_Window);
+		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
 
 		/*用来将自定义的指针数据与窗口对象相关联；这样做的目的通常是为了在程序中
@@ -173,6 +175,13 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		glfwDestroyWindow(m_Window);
+		s_GLFWWindowCount--;
+
+		if (s_GLFWWindowCount == 0) 
+		{
+			HZ_CORE_INFO("Terminating GLFW..");
+			glfwTerminate();
+		}
 	}
 
 	void WindowsWindow::OnUpdate()

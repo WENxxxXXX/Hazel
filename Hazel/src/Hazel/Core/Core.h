@@ -35,6 +35,7 @@
 	#error "Unknown platform!"
 #endif
 
+/*
 #ifdef HZ_PLATFORM_WINDOWS
 #if HZ_DYNAMIC_LINK
 	#ifdef HZ_BUILD_DLL
@@ -48,6 +49,7 @@
 #else
 	#error Hazel only support Windows!
 #endif
+*/
 
 #ifdef HZ_DEBUG
 	#define HZ_ENABLE_ASSERTS
@@ -70,6 +72,7 @@
 	#define HZ_ASSERT(x, ...)
 #endif
 
+//绑定一个成员函数，并占位参数，稍后使用  !!!是_1而不是 1,宏定义最后不用写; !!!
 #define BIT(x) (1 << (x))
 
 #define HZ_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)

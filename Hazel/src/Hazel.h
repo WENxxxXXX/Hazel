@@ -1,8 +1,7 @@
 #pragma once
 
 // 仅供客户端应用程序包含
-
-
+#include "Hazel/Core/Core.h"
 #include "Hazel/Core/Application.h"
 #include "Hazel/Core/Layer.h"
 #include "Hazel/Core/Log.h"

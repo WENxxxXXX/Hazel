@@ -3,10 +3,6 @@
 #include "Application.h"
 
 namespace Hazel {
-	LayerStack::LayerStack()
-	{
-	}
-
 	LayerStack::~LayerStack()
 	{
 		for each(Layer * layer in m_Layers)

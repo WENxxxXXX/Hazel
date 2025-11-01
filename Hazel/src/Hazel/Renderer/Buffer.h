@@ -35,12 +35,12 @@ namespace Hazel
 		std::string Name;
 		ShaderDataType Type;
 		uint32_t Size;
-		uint32_t Offset;
+		size_t   Offset;
 		uint32_t Count;
 		bool Normalized;
 		uint32_t GLType;
 
-		LayoutElement() {}
+		LayoutElement() = default;
 
 		LayoutElement(ShaderDataType type, const std::string& name, bool normalized = false)
 			:Type(type), Name(name), Size(ShaderDataTypeSize(type)), Offset(0), 
@@ -114,7 +114,7 @@ namespace Hazel
 		void CalcOffsetAndStride()
 		{
 			m_Stride = 0;
-			uint32_t offset = 0;
+			size_t offset = 0;
 			for (auto& element : m_Elements)
 			{
 				element.Offset = offset;//第一个布局的 offset 为 0，后续累加
@@ -137,10 +137,13 @@ namespace Hazel
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
+		virtual void SetData(const void* data, uint32_t size) const = 0;
+
 		virtual const BufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const BufferLayout& layout) = 0;
 
-		static VertexBuffer* Create(float* vertices, uint32_t size);
+		static Ref<VertexBuffer> Create(uint32_t size);
+		static Ref<VertexBuffer> Create(float* vertices, uint32_t size);
 	};
 
 	//////////////////////////////////////////////////////
@@ -155,6 +158,6 @@ namespace Hazel
 		virtual void Unbind() const = 0;
 		virtual uint32_t GetCount() const = 0;
 
-		static IndexBuffer* Create(uint32_t* indices, uint32_t count);
+		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
 	};
 }

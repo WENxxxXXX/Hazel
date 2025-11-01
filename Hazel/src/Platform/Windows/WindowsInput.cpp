@@ -6,9 +6,6 @@
 
 namespace Hazel
 {
-	//s_Instance 是一个没有包含任何数据的实例对象
-	Scope<Input> Input::s_Instance = CreateScope<WindowsInput>();
-
 	bool WindowsInput::IsKeyPressedImpl(int keycode)
 	{
 		//每个平台的window类型不一样
