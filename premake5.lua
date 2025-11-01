@@ -56,7 +56,8 @@ project "Hazel"
 
     defines
     {
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS",
+        "GLFW_INCLUDE_NONE"
     }
 
     includedirs --包含目录
@@ -83,8 +84,7 @@ project "Hazel"
         defines                 --宏的声明
         {
             --"HZ_PLATFORM_WINDOWS",
-            "HZ_BUILD_DLL",
-            "GLFW_INCLUDE_NONE"
+            "HZ_BUILD_DLL"
         }
         outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}" 
         postbuildcommands       --构建项目完成后执行的指令

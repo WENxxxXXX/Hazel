@@ -176,12 +176,13 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
-		// Maybe Renderer2DData::MaxIndices ??? If Indices more than batch rendering can include,
-		// then start new batch rendering
+		// If Indices more than batch rendering can include, then start new batch rendering
 		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
 			FlushAndReset();
 		}
 
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		const float textureIndex = 0.0f;// Just use the white texutre
 		const float tilingFactor = 1.0f;// Single color don't need tiling factor
 
@@ -190,33 +191,14 @@ namespace Hazel {
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		// !!!不要写成 s_Data.QuadVertexPosition[0] * transform，给 transform 左乘一个位置向量这样的操作是无效的。
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		for (size_t i = 0; i < quadVertexCount; i++) {
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = color;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
@@ -238,6 +220,8 @@ namespace Hazel {
 			FlushAndReset();
 		}
 
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		float textureIndex = 0.0f;
 		// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。
 		// （这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
@@ -249,6 +233,11 @@ namespace Hazel {
 		}
 		// 若未命中，则将纹理放入纹理集中，并将最新的s_Data.TextureSoltIndex赋予给临时变量textureIndex，并自增一次
 		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) 
+			{// 如果纹理数也多于最大值，就刷新一次批渲染
+				FlushAndReset();
+			}
+
 			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
 			// 从TextureSoltIndex = 0开始，依次相纹理集中存入新的纹理。存入后自增一次.
 			textureIndex = float(s_Data.TextureSlotIndex);
@@ -260,33 +249,15 @@ namespace Hazel {
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		for (size_t i = 0; i < quadVertexCount; i++)
+		{
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = tintColor;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
@@ -313,36 +284,19 @@ namespace Hazel {
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f }
 			);
 
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		const float textureIndex = 0.0f;
 		const float tilingFactor = 1.0f;
 
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = color;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		for (size_t i = 0; i < quadVertexCount; i++) {
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = color;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
@@ -368,7 +322,8 @@ namespace Hazel {
 			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f }
 			);
 
-
+		constexpr size_t quadVertexCount = 4;
+		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		float textureIndex = 0.0f;
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
 			if (*s_Data.Textures[i].get() == *texture.get()) {
@@ -377,39 +332,24 @@ namespace Hazel {
 			}
 		}
 		if (textureIndex == 0.0f) {
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) {
+				FlushAndReset();
+			}
+
 			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
 			textureIndex = float(s_Data.TextureSlotIndex);
 
 			s_Data.TextureSlotIndex++;
 		}
 
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[1];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 0.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[2];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 1.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
-
-		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[3];
-		s_Data.QuadVBHind->Color = tintColor;
-		s_Data.QuadVBHind->TexCoord = { 0.0f, 1.0f };
-		s_Data.QuadVBHind->TexIndex = textureIndex;
-		s_Data.QuadVBHind->TilingFactor = tilingFactor;
-		s_Data.QuadVBHind++;
+		for (size_t i = 0; i < quadVertexCount; i++) {
+			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
+			s_Data.QuadVBHind->Color = tintColor;
+			s_Data.QuadVBHind->TexCoord = texCoords[i];
+			s_Data.QuadVBHind->TexIndex = textureIndex;
+			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind++;
+		}
 
 		s_Data.QuadIndexCount += 6;
 
