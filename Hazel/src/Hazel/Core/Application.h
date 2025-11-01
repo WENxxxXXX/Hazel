@@ -26,6 +26,8 @@ namespace Hazel
 		inline Window& GetWindow() { return *m_Window; }
 
 		inline static Application& Get() { return *s_Instance; }
+		// 不同于 OnWindowClose ，WindowClose 是公有的关闭窗口函数，而 OnWindowClose 是回调函数中的事件处理
+		inline void WindowClose() { m_Running = false; }
 	private:
 		void Run();
 
