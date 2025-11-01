@@ -62,11 +62,11 @@ namespace Hazel
 		//图层的事件处理是反向的（从尾到头），！！！反向迭代器中的 iter 需要使用前置递增（先加后用）
 		for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)	
 		{
-			(*it)->OnEvent(e);
 			if (e.Handled)
 			{
 				break;
 			}
+			(*it)->OnEvent(e);
 		}
 	}
 
