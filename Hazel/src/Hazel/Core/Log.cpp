@@ -17,7 +17,7 @@ namespace Hazel
 		// 存储一个将日志消息输出到控制台,并带有颜色的日志目标。
 		logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
 		// 指定一个日志目标，输出到 "Nut.log" ，并在每次启动时清空文件 (true 表示清空，false 表示追加写入)。
-		logSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("Nut.log", true));
+		logSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("Hazel.log", true));
 
 		//样式设计
 		logSinks[0]->set_pattern("%^[%T] %n: %v%$");
