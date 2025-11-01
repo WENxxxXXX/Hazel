@@ -17,10 +17,18 @@ void Sandbox2D::OnAttach()
 	m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 	m_Emoji = Hazel::Texture2D::Create("assets/textures/emoji.png");
 
+	// Test 1
+	m_SpriteSheet = Hazel::Texture2D::Create("assets/game/textures/tilemap_packed .png");
+	m_Box = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 9, 8 } /* ,{1,1} */);
+	m_InfoBox = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 10, 8 }, { 1, 1 });
+	// Test2
+	m_SpriteSheetRPG = Hazel::Texture2D::Create("assets/game/textures/RPGpack_sheet_2X.png");
+	m_Flag = Hazel::SubTexture2D::Create(m_SpriteSheetRPG, { 128, 128 }, { 2, 1 }, { 1, 2 });
+
 	m_Particle.ColorBegin = { 138 / 255.0f, 43 / 255.0f, 226 / 255.0f, 1.0f };
 	m_Particle.ColorEnd = { 254 / 255.0f, 109 / 255.0f, 41 / 255.0f, 1.0f };
 	m_Particle.SizeBegin = 0.3f, m_Particle.SizeVariation = 0.3f, m_Particle.SizeEnd = 0.0f;
-	m_Particle.LifeTime = 10.0f;
+	m_Particle.LifeTime = 1.0f;
 	m_Particle.Velocity = { 0.0f, 0.0f };
 	m_Particle.VelocityVariation = { 3.0f, 1.0f };
 	m_Particle.Position = { 0.0f, 0.0f };
@@ -47,6 +55,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	{
 		HZ_PROFILE_SCOPE("Renderer2D Draw");
 
+#if 0
 		static float temp = 0.0f;
 		temp += ts * 100.0f;
 
@@ -86,6 +95,13 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 		}
 		m_ParticleSystem.OnUpdate(ts);											// 更新信息
 		m_ParticleSystem.OnRender(m_CameraController.GetCamera());				// 渲染粒子
+#endif
+
+		Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
+		Hazel::Renderer2D::DrawQuad({ 1.0f, 1.0f, 0.0f }, { 1.0f, 1.0f }, m_Box);
+		Hazel::Renderer2D::DrawQuad({ 1.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, m_InfoBox);
+		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 2.0f }, m_Flag);
+
 		Hazel::Renderer2D::EndScene();
 	}
 }

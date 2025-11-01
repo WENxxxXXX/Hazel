@@ -19,6 +19,9 @@ public:
 private:
 	Hazel::Ref<Hazel::Texture2D> m_Texture;
 	Hazel::Ref<Hazel::Texture2D> m_Emoji;
+	Hazel::Ref<Hazel::Texture2D> m_SpriteSheet, m_SpriteSheetRPG;
+	Hazel::Ref<Hazel::SubTexture2D> m_Box, m_InfoBox, m_Flag;
+
 	Hazel::OrthoGraphicCameraController m_CameraController;
 
 	glm::vec4 m_QuadColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };

@@ -16,7 +16,7 @@ bin-int/
 !vendor/bin/premake/
 
 # Ingore Log file
-*.log
+**.log
 
 # Ignore all .json files
 /Sandbox/*.json

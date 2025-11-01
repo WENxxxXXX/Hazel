@@ -1421,6 +1421,7 @@
     </ClInclude>
     <ClInclude Include="src\Hazel\Renderer\Renderer2D.h" />
     <ClInclude Include="src\Hazel\Debug\Instrumentor.h" />
+    <ClInclude Include="src\Hazel\Renderer\SubTexture2D.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Core\Application.cpp">
@@ -1502,5 +1503,6 @@
     <ClCompile Include="src\Hazel\Renderer\GraphicdContext.cpp" />
     <ClCompile Include="src\Hazel\Core\Window.cpp" />
     <ClCompile Include="src\Hazel\Core\Input.cpp" />
+    <ClCompile Include="src\Hazel\Renderer\SubTexture2D.cpp" />
   </ItemGroup>
 </Project>
