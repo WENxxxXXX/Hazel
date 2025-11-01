@@ -1,8 +1,8 @@
-[13:58:31] [warning] HAZEL: Initialized Log!
-[13:58:31] [info] APP: Goodbye World!
-[13:58:31] [info] HAZEL: Creating window Hazel Engine (1600, 900)
-[13:58:31] [info] HAZEL: Initializing GLFW window..
-[13:58:31] [info] HAZEL: OpenGL info: 
-[13:58:31] [info] HAZEL: Vendor: NVIDIA Corporation
-[13:58:31] [info] HAZEL: Renderer: NVIDIA GeForce RTX 3060 Laptop GPU/PCIe/SSE2
-[13:58:31] [info] HAZEL: Version: 4.6.0 NVIDIA 571.96
+[14:42:16] [warning] HAZEL: Initialized Log!
+[14:42:16] [info] APP: Goodbye World!
+[14:42:16] [info] HAZEL: Creating window Hazel Engine (1600, 900)
+[14:42:16] [info] HAZEL: Initializing GLFW window..
+[14:42:17] [info] HAZEL: OpenGL info: 
+[14:42:17] [info] HAZEL: Vendor: NVIDIA Corporation
+[14:42:17] [info] HAZEL: Renderer: NVIDIA GeForce RTX 3060 Laptop GPU/PCIe/SSE2
+[14:42:17] [info] HAZEL: Version: 4.6.0 NVIDIA 571.96

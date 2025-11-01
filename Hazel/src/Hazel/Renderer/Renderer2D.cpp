@@ -21,9 +21,9 @@ namespace Hazel {
 
 	struct Renderer2DData
 	{
-		const uint32_t MaxQuads = 100;
-		const uint32_t MaxVertices = MaxQuads * 4;
-		const uint32_t MaxIndices = MaxQuads * 6;
+		static const uint32_t MaxQuads = 100;
+		static const uint32_t MaxVertices = MaxQuads * 4;
+		static const uint32_t MaxIndices = MaxQuads * 6;
 		uint32_t QuadIndexCount = 0;
 		static const uint32_t MaxTextureSlots = 32;
 
@@ -37,7 +37,7 @@ namespace Hazel {
 		QuadVertex* QuadVBHind = nullptr;// 顶点指针末尾
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> Textures;
-		uint32_t TextureSoltIndex = 1;
+		uint32_t TextureSlotIndex = 1;
 
 		// 一个方形的基础顶点(默认将其中心放在坐标系原点上，故在使用translate位移时，
 		// 可直接位移到位移向量的端点。而为什么是glm::vec4组成的元素，
@@ -49,6 +49,8 @@ namespace Hazel {
 			{  0.5f,  0.5f, 0.0f, 1.0f },
 			{ -0.5f,  0.5f, 0.0f, 1.0f }
 		};
+
+		Renderer2D::Statistics Stats;
 	};
 	static Renderer2DData s_Data;//
 
@@ -124,9 +126,12 @@ namespace Hazel {
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 
-		s_Data.QuadIndexCount = 0;//每结束（刷新）一次批渲染，需要绘制的索引数要从零重新开始
-		s_Data.TextureSoltIndex = 1;//每结束（刷新）一次批渲染，需要绘制的纹理索引要从一重新开始（排除白色纹理）
-		s_Data.QuadVBHind = s_Data.QuadVBBase;//初始化后端指针 Hind 的位置（最初为零）
+		//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的索引数要从零重新开始
+		s_Data.QuadIndexCount = 0;
+		//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的纹理索引要从一重新开始（排除白色纹理）
+		s_Data.TextureSlotIndex = 1;
+		//每结束一次场景（依次场景中可能包含多个批渲染调用）,初始化后端指针 Hind 的位置（最初为零）
+		s_Data.QuadVBHind = s_Data.QuadVBBase;
 	}
 
 	void Renderer2D::EndScene()
@@ -134,20 +139,31 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
-		uint32_t dataSize = (uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase;
+		uint32_t dataSize = uint32_t((uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase);
 		// Reset VertexBuffer so flush Vertex data （because of Dynamic Draw)
 		s_Data.QuadVB->SetData(s_Data.QuadVBBase, dataSize);
 
 		Flush();// 更新数据之后绘制（刷新）
 	}
 
+	// 如果当前绘制的顶点（或索引）超出了一次批渲染的限制，便开启下一次批渲染，并清零当前记录的顶点数
+	void Renderer2D::FlushAndReset()
+	{
+		EndScene();
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.TextureSlotIndex = 1;
+		s_Data.QuadVBHind = s_Data.QuadVBBase;
+	}
+
 	void Renderer2D::Flush()
 	{
 		// Bind texture before rendering
-		for (uint32_t i = 0; i < s_Data.TextureSoltIndex; i++)
+		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
 			// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
 			s_Data.Textures[i]->Bind(i);
 		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);
+		s_Data.Stats.DrawCalls++;
 	}
 
 	// -------------------------- Draw func --------------------------------------
@@ -159,6 +175,12 @@ namespace Hazel {
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
 	{
 		HZ_PROFILE_FUNCTION();
+
+		// Maybe Renderer2DData::MaxIndices ??? If Indices more than batch rendering can include,
+		// then start new batch rendering
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
 
 		const float textureIndex = 0.0f;// Just use the white texutre
 		const float tilingFactor = 1.0f;// Single color don't need tiling factor
@@ -197,6 +219,8 @@ namespace Hazel {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, 
@@ -210,10 +234,14 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
+
 		float textureIndex = 0.0f;
 		// 遍历纹理，查看现有纹理是否已经存入。若命中，则将i赋予给临时变量textureIndex，并跳出。
 		// （这里的每一个纹理的索引可以看做是其编号，通过纹理集中的位置表示:0,1,2 ...）
-		for (uint32_t i = 1; i < s_Data.TextureSoltIndex; i++) {
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
 			if (*texture.get() == *s_Data.Textures[i].get()) {
 				textureIndex = (float)i;// 将纹理在纹理集中的位置作为索引
 				break;
@@ -221,11 +249,11 @@ namespace Hazel {
 		}
 		// 若未命中，则将纹理放入纹理集中，并将最新的s_Data.TextureSoltIndex赋予给临时变量textureIndex，并自增一次
 		if (textureIndex == 0.0f) {
-			s_Data.Textures[s_Data.TextureSoltIndex] = texture;
+			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
 			// 从TextureSoltIndex = 0开始，依次相纹理集中存入新的纹理。存入后自增一次.
-			textureIndex = float(s_Data.TextureSoltIndex);
+			textureIndex = float(s_Data.TextureSlotIndex);
 
-			s_Data.TextureSoltIndex++;
+			s_Data.TextureSlotIndex++;
 		}
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
@@ -261,6 +289,8 @@ namespace Hazel {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
 	}
 
 	//------------------------------------------------- Rotated Quad --------------------------------------------------------------
@@ -272,6 +302,10 @@ namespace Hazel {
 	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
 		HZ_PROFILE_FUNCTION();
+
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
 
 		glm::mat4 transform =
 			glm::translate(glm::mat4(1.0f), position)
@@ -311,6 +345,8 @@ namespace Hazel {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
@@ -322,6 +358,10 @@ namespace Hazel {
 	{
 		HZ_PROFILE_FUNCTION();
 
+		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
+			FlushAndReset();
+		}
+
 		glm::mat4 transform =
 			glm::translate(glm::mat4(1.0f), position)
 			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
@@ -330,17 +370,17 @@ namespace Hazel {
 
 
 		float textureIndex = 0.0f;
-		for (uint32_t i = 1; i < s_Data.TextureSoltIndex; i++) {
+		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++) {
 			if (*s_Data.Textures[i].get() == *texture.get()) {
 				textureIndex = (float)i;
 				break;
 			}
 		}
 		if (textureIndex == 0.0f) {
-			s_Data.Textures[s_Data.TextureSoltIndex] = texture;
-			textureIndex = float(s_Data.TextureSoltIndex);
+			s_Data.Textures[s_Data.TextureSlotIndex] = texture;
+			textureIndex = float(s_Data.TextureSlotIndex);
 
-			s_Data.TextureSoltIndex++;
+			s_Data.TextureSlotIndex++;
 		}
 
 		s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[0];
@@ -372,5 +412,19 @@ namespace Hazel {
 		s_Data.QuadVBHind++;
 
 		s_Data.QuadIndexCount += 6;
+
+		s_Data.Stats.QuadCount++;
+	}
+
+	void Renderer2D::ClearStats()
+	{
+		//s_Data.Stats.DrawCalls = 0;
+		//s_Data.Stats.QuadCount = 0;
+		memset(&s_Data.Stats, 0, sizeof(Statistics));
+	}
+
+	Renderer2D::Statistics Renderer2D::GetStats()
+	{
+		return s_Data.Stats;
 	}
 }
