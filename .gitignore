@@ -19,9 +19,9 @@ bin-int/
 **.log
 
 # Ignore all .json files
-/Sandbox/*.json
+Sandbox/*.json
 Sandbox/NutProfile-Runtime.json
 Sandbox/NutProfile-Shutdown.json
 Sandbox/NutProfile-Startup.json
 # Ignore imgui.ini file
-/Sandbox/imgui.ini
+Sandbox/imgui.ini

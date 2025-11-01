@@ -5,6 +5,23 @@
 
 #include <imgui/imgui.h>
 
+static const char* s_GameMap = {
+	"AAAAAAAAAAAAAAAAAMMA"
+	"AAAAAAAAAAAAAAAALLLL"
+	"AAAAAAAAAAAAAAAADDDD"
+	"SAAAAAAAAAAAAAAAAAAA"
+	"LWWWWLAAAAAAAAAAABAA"
+	"LWWWWLLLLAAAAAAAAAAA"
+	"DDDDDDDDDAAAALLLLGGL"
+	"AAAAAAAAAAAAADDDDDDD"
+	"AAAAAAAAAAAAAAAAAAAA"
+	"AAALLLLAALLLLLLLLLLL"
+	"GGGDDDDGGDDDDDDDDDDD"
+	"DDDDDDDDDDDDDDDDDDDD" };
+static const  uint32_t s_MapWidth = 20;
+static const  uint32_t s_MapHeight = strlen(s_GameMap) / s_MapWidth;
+
+
 Sandbox2D::Sandbox2D()
 	:Layer("Sandbox2D"), m_CameraController(1280.0f / 720.0f, true)
 {
@@ -18,12 +35,19 @@ void Sandbox2D::OnAttach()
 	m_Emoji = Hazel::Texture2D::Create("assets/textures/emoji.png");
 
 	// Test 1
-	m_SpriteSheet = Hazel::Texture2D::Create("assets/game/textures/tilemap_packed .png");
-	m_Box = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 9, 8 } /* ,{1,1} */);
-	m_InfoBox = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 10, 8 }, { 1, 1 });
+	m_SpriteSheet = Hazel::Texture2D::Create("assets/game/textures/tilemap_packed.png");
+	m_TilesMap['D'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 4, 8 } /* ,{1,1} */);
+	m_TilesMap['G'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 0, 8 });
+	m_TilesMap['L'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 0, 6 });
+	m_TilesMap['W'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 13, 5 });
+	m_TilesMap['B'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 9, 8 });
+	m_TilesMap['K'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 7, 7 });
+	m_TilesMap['F'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 11, 3 });
+	m_TilesMap['M'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 8, 2 });
+	m_TilesMap['S'] = Hazel::SubTexture2D::Create(m_SpriteSheet, { 18, 18 }, { 5, 1 });
 	// Test2
-	m_SpriteSheetRPG = Hazel::Texture2D::Create("assets/game/textures/RPGpack_sheet_2X.png");
-	m_Flag = Hazel::SubTexture2D::Create(m_SpriteSheetRPG, { 128, 128 }, { 2, 1 }, { 1, 2 });
+	m_SpriteSheetRole = Hazel::Texture2D::Create("assets/game/textures/tilemap(2).png");
+	m_Role = Hazel::SubTexture2D::Create(m_SpriteSheetRole, { 16, 16 }, { 0, 3 }, { 1, 1 });
 
 	m_Particle.ColorBegin = { 138 / 255.0f, 43 / 255.0f, 226 / 255.0f, 1.0f };
 	m_Particle.ColorEnd = { 254 / 255.0f, 109 / 255.0f, 41 / 255.0f, 1.0f };
@@ -32,6 +56,8 @@ void Sandbox2D::OnAttach()
 	m_Particle.Velocity = { 0.0f, 0.0f };
 	m_Particle.VelocityVariation = { 3.0f, 1.0f };
 	m_Particle.Position = { 0.0f, 0.0f };
+
+	m_CameraController.SetZoomLevel(5.0f);
 }
 
 void Sandbox2D::OnDetach()
@@ -49,7 +75,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 	// Render
 	{
 		HZ_PROFILE_SCOPE("RenderCommand Prep");
-		Hazel::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
+		Hazel::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		Hazel::RendererCommand::Clear();
 	}
 	{
@@ -77,7 +103,7 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 			}
 		}
 		Hazel::Renderer2D::EndScene();
-
+#endif
 		Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
 		if (Hazel::Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
 		{
@@ -95,12 +121,25 @@ void Sandbox2D::OnUpdate(Hazel::Timestep ts)
 		}
 		m_ParticleSystem.OnUpdate(ts);											// 更新信息
 		m_ParticleSystem.OnRender(m_CameraController.GetCamera());				// 渲染粒子
-#endif
 
 		Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
-		Hazel::Renderer2D::DrawQuad({ 1.0f, 1.0f, 0.0f }, { 1.0f, 1.0f }, m_Box);
-		Hazel::Renderer2D::DrawQuad({ 1.0f, 0.0f, 0.0f }, { 1.0f, 1.0f }, m_InfoBox);
-		Hazel::Renderer2D::DrawQuad({ 0.0f, 0.0f, 0.0f }, { 1.0f, 2.0f }, m_Flag);
+		
+
+		for (uint32_t x = 0; x < s_MapWidth; x++) {
+			for (uint32_t y = 0; y < s_MapHeight; y++)
+			{
+				char keyChar = s_GameMap[x + y * s_MapWidth];
+
+				Hazel::Ref<Hazel::SubTexture2D> subTexture;
+				if (m_TilesMap.find(keyChar) != m_TilesMap.end()) {
+					subTexture = m_TilesMap[keyChar];
+					Hazel::Renderer2D::DrawQuad({ x, s_MapHeight - y , 0.0f }, { 1.0f, 1.0f }, subTexture);
+				}
+				else
+					Hazel::Renderer2D::DrawQuad({ x, s_MapHeight - y, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f, 1.0f });
+			}
+		}
+		Hazel::Renderer2D::DrawQuad({ 18.0f, 7.0f, 0.5f }, { 1.0f, 1.0f }, m_Role);
 
 		Hazel::Renderer2D::EndScene();
 	}

@@ -5,7 +5,8 @@
 namespace Hazel
 {
 
-	SubTexture2D::SubTexture2D(const Ref<Texture2D>& texture, const glm::vec2& cellSize /* A single cell size */, const glm::vec2& spritePos, const glm::vec2& spriteSize /* The number of cells which sprite occupies in x/y direction */)
+	SubTexture2D::SubTexture2D(const Ref<Texture2D>& texture, const glm::vec2& cellSize /* A single cell size */, 
+		const glm::vec2& spritePos, const glm::vec2& spriteSize /* The number of cells which sprite occupies in x/y direction */)
 		:m_Texture(texture)
 	{
 		float sheetWidth = texture->GetWidth(), sheetHeight = texture->GetHeight();
