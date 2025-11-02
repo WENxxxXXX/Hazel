@@ -21,7 +21,10 @@ namespace Hazel
 
 		void Begin();
 		void End();
+
+		void BlockEvents(bool block) { m_BlockEvents = block; }
 	private:
 		float m_Time;
+		bool m_BlockEvents = true;
 	};
 }

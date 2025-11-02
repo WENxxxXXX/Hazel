@@ -200,7 +200,6 @@ copy /B /Y ..\bin\Dist-windows-x86_64\Hazel\Hazel.lib ..\bin\Dist-windows-x86_64
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\hzpch.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
@@ -625,7 +624,6 @@ copy /B /Y ..\bin\Dist-windows-x86_64\Hazel\Hazel.lib ..\bin\Dist-windows-x86_64
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Hazel\Core\Application.cpp" />
-    <ClCompile Include="src\Hazel\Core\Input.cpp" />
     <ClCompile Include="src\Hazel\Core\Layer.cpp" />
     <ClCompile Include="src\Hazel\Core\LayerStack.cpp" />
     <ClCompile Include="src\Hazel\Core\Log.cpp" />
