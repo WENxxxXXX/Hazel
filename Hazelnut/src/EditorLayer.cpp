@@ -33,7 +33,14 @@ namespace Hazel
 	void EditorLayer::OnUpdate(Hazel::Timestep ts)
 	{
 		HZ_PROFILE_FUNCTION();// 一个作用域只能声明一个 Timer 变量
-		// Update
+		// Logic Update
+		if ((m_ViewportSize.x != m_Framebuffer->GetSpecification().Width || m_ViewportSize.y != m_Framebuffer->GetSpecification().Height)
+			&& m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
+		{
+			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_CameraController.Resize(m_ViewportSize.x, m_ViewportSize.y);
+		}
+		// Screen Update
 		if (m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
 		Hazel::Renderer2D::ClearStats();// 每次更新前都要将Stats统计数据清零
@@ -41,6 +48,8 @@ namespace Hazel
 		{
 			HZ_PROFILE_SCOPE("RenderCommand Prep");
 			m_Framebuffer->Bind();// 在颜色被设置之前就声明帧缓冲
+
+			Renderer2D::ClearStats();// 每次更新前都要将Stats统计数据清零
 			Hazel::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 			Hazel::RendererCommand::Clear();
 		}
@@ -78,6 +87,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
+		// PrepareDockspace
 		static bool dockspaceOpen = true;
 		static bool opt_fullscreen = true;
 		static bool opt_padding = false;
@@ -175,14 +185,8 @@ namespace Hazel
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
 		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
-
-		ImVec2 panelSize = ImGui::GetContentRegionAvail();// 获取面板大小
-		if (m_ViewportSize != *(glm::vec2*)&panelSize)
-		{
-			m_ViewportSize = { panelSize.x, panelSize.y };// 及时更新视口大小
-			m_Framebuffer->Resize(panelSize.x, panelSize.y);
-			m_CameraController.Resize(panelSize.x, panelSize.y);
-		}
+		ImVec2 panelSize = ImGui::GetContentRegionAvail();
+		m_ViewportSize = { panelSize.x, panelSize.y };
 
 		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
