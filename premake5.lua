@@ -25,6 +25,7 @@ IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
 IncludeDir["Imgui"] = "Hazel/vendor/imgui"
 IncludeDir["glm"] = "Hazel/vendor/glm"
 IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
+IncludeDir["entt"] = "Hazel/vendor/Entt/include"
 
 include "Hazel/vendor/GLFW"-- 检索这个目录下的lua文件，根据这些lua文件构建项目
 include "Hazel/vendor/Glad"
@@ -68,7 +69,8 @@ project "Hazel"
         "%{IncludeDir.Glad}",
         "%{IncludeDir.Imgui}",
         "%{IncludeDir.glm}",
-        "%{IncludeDir.stb_image}"
+        "%{IncludeDir.stb_image}",
+        "%{IncludeDir.entt}"
     }
 
     links       --为项目(.dll)附加依赖项
@@ -182,7 +184,8 @@ project "Hazelnut"
         "Hazel/vendor/spdlog/include",
         "Hazel/src",
         "%{IncludeDir.glm}",
-        "Hazel/vendor"
+        "Hazel/vendor",
+        "%{IncludeDir.entt}"
     }
 
     links
