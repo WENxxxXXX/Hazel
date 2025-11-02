@@ -2,7 +2,7 @@
 
 workspace "Hazel"
     architecture "x86_64"
-    startproject "Sandbox"          --[[启动项目]]
+    startproject "Hazelnut"          --[[启动项目]]
     configurations 
     { 
         "Debug",
@@ -162,8 +162,8 @@ project "Sandbox"
         optimize "on"
 
 
-project "Hazel-Editor"
-    location "Hazel-Editor"
+project "Hazelnut"
+    location "Hazelnut"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"

@@ -30,9 +30,9 @@ Sandbox/*.json
 Sandbox/HazelProfile-Runtime.json
 Sandbox/HazelProfile-Shutdown.json
 Sandbox/HazelProfile-Startup.json
-Hazel-Editor/*.json
-Hazel-Editor/HazelProfile-Runtime.json
-Hazel-Editor/HazelProfile-Shutdown.json
-Hazel-Editor/HazelProfile-Startup.json
+Hazelnut/*.json
+Hazelnut/HazelProfile-Runtime.json
+Hazelnut/HazelProfile-Shutdown.json
+Hazelnut/HazelProfile-Startup.json
 # Ignore imgui.ini file
 Sandbox/imgui.ini
