@@ -173,12 +173,7 @@ namespace Hazel {
 	}
 
 	// -------------------------- Draw func --------------------------------------
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
-	{
-		DrawQuad({ position.x, position.y, 0.0f }, size, color);
-	}
-
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -191,9 +186,6 @@ namespace Hazel {
 		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 		const float textureIndex = 0.0f;// Just use the white texutre
 		const float tilingFactor = 1.0f;// Single color don't need tiling factor
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		// !!!不要写成 s_Data.QuadVertexPosition[0] * transform，给 transform 左乘一个位置向量这样的操作是无效的。
@@ -211,14 +203,25 @@ namespace Hazel {
 		s_Data.Stats.QuadCount++;
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, 
-		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
 	{
-		DrawQuad({ position.x, position.y }, size, texture, tilingFactor, tintColor);
+		DrawQuad({ position.x, position.y, 0.0f }, size, color);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, 
-		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+		// calc the transform then draw it with "matrix function"
+		DrawQuad(transform, color);
+	}
+
+
+	// -------------------------- Draw Texture --------------------------
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, 
+		float tilingFactor, const glm::vec4& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -239,7 +242,7 @@ namespace Hazel {
 		}
 		// 若未命中，则将纹理放入纹理集中，并将最新的s_Data.TextureSoltIndex赋予给临时变量textureIndex，并自增一次
 		if (textureIndex == 0.0f) {
-			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots) 
+			if (s_Data.TextureSlotIndex >= s_Data.MaxTextureSlots)
 			{// 如果纹理数也多于最大值，就刷新一次批渲染
 				FlushAndReset();
 			}
@@ -250,9 +253,6 @@ namespace Hazel {
 
 			s_Data.TextureSlotIndex++;
 		}
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
 
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		for (size_t i = 0; i < quadVertexCount; i++)
@@ -270,17 +270,26 @@ namespace Hazel {
 		s_Data.Stats.QuadCount++;
 	}
 
-	// -------------------------- Draw SubTexture
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, 
-		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, 
-		const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		DrawQuad({ position.x, position.y }, size, subtexture, tilingFactor, tintColor);
+		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, 
-		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, 
-		const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+
+		DrawQuad(transform, texture, tilingFactor, tintColor);
+	}
+
+	// -------------------------- Draw SubTexture
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subtexture,
+		float tilingFactor, const glm::vec4& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -311,9 +320,6 @@ namespace Hazel {
 			s_Data.TextureSlotIndex++;
 		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
-
 		// 顶点需要被按照线框上的0,1,2,3顶点序号进行逆时针的顺序放置，以便得到正确的绘制结果
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
@@ -330,25 +336,34 @@ namespace Hazel {
 		s_Data.Stats.QuadCount++;
 	}
 
-	//------------------------------------------------- Rotated Quad --------------------------------------------------------------
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, 
+		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, 
+		const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
+		DrawQuad({ position.x, position.y, 0.0f }, size, subtexture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, 
+		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, 
+		const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 0.0f });
+
+		DrawQuad(transform, subtexture, tilingFactor, tintColor);
+	}
+
+	//------------------------------------------------- Rotated Quad --------------------------------------------------------------
+	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation, const glm::vec4& color)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
 			FlushAndReset();
 		}
-
-		glm::mat4 transform =
-			glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f }
-			);
 
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -368,25 +383,32 @@ namespace Hazel {
 
 		s_Data.Stats.QuadCount++;
 	}
-
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const glm::vec4& color)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawRotatedQuad(transform, rotation, color);
+	}
+
+	// ------------------------------------- Draw Rotated Texture
+	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation, 
+		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
 
 		if (s_Data.QuadIndexCount >= s_Data.MaxIndices) {
 			FlushAndReset();
 		}
-
-		glm::mat4 transform =
-			glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f }
-			);
 
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 texCoords[4] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -422,15 +444,25 @@ namespace Hazel {
 		s_Data.Stats.QuadCount++;
 	}
 
-	// ------------------------------------- Draw SubTexture
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, 
-		float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
-		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subtexture, tilingFactor, tintColor);
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, 
-		float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawRotatedQuad(transform, rotation, texture, tilingFactor, tintColor);
+	}
+
+	// ------------------------------------- Draw Rotated SubTexture
+	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation,
+		const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -460,10 +492,6 @@ namespace Hazel {
 			s_Data.TextureSlotIndex++;
 		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
 		for (size_t i = 0; i < quadVertexCount; i++) {
 			s_Data.QuadVBHind->Position = transform * s_Data.QuadVertexPosition[i];
 			s_Data.QuadVBHind->Color = tintColor;
@@ -476,6 +504,24 @@ namespace Hazel {
 		s_Data.QuadIndexCount += 6;
 
 		s_Data.Stats.QuadCount++;
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, 
+		float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subtexture, tilingFactor, tintColor);
+	}
+
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, 
+		float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
+			* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+
+		DrawRotatedQuad(transform, rotation, subtexture, tilingFactor, tintColor);
 	}
 
 	void Renderer2D::ClearStats()
