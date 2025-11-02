@@ -24,9 +24,8 @@ namespace Hazel
 		m_CameraController.SetZoomLevel(5.0f);
 
 		m_ActiveScene = CreateRef<Scene>();
-		m_SquareEntity = m_ActiveScene->CreateEntity();
-		m_ActiveScene->Reg().emplace<TransformComponent>(m_SquareEntity, glm::mat4{ 1.0f });
-		m_ActiveScene->Reg().emplace<SpriteComponent>(m_SquareEntity, glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
+		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
 	}
 
 	void EditorLayer::OnDetach()
@@ -164,7 +163,16 @@ namespace Hazel
 		ImGui::Text("Vertices: %d", stats.GetVertexCount());
 		ImGui::Text("Indices: %d", stats.GetIndexCount());
 
-		ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(m_QuadColor));
+		if (m_SquareEntity.HasComponent<TagComponent>())
+		{
+			ImGui::Separator();
+			auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
+			ImGui::Text("%s", tag.c_str());
+
+			auto& squareColor = m_SquareEntity.GetComponent<SpriteComponent>().Color;
+			ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(squareColor));
+			ImGui::Separator();
+		}
 
 		ImGui::End();
 
