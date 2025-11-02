@@ -16,9 +16,6 @@ namespace Hazel
 		void OnUpdate(Timestep ts);
 
 		Entity CreateEntity(const std::string& name = "");
-
-		// TEMP
-		entt::registry& Reg() { return m_Registry; }
 	private:
 		entt::registry m_Registry;
 

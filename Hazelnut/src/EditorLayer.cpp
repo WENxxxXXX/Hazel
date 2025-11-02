@@ -26,6 +26,14 @@ namespace Hazel
 		m_ActiveScene = CreateRef<Scene>();
 		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+
+		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
+		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+		firstController.Primary = true;
+
+		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
+		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+		secondController.Primary = false;
 	}
 
 	void EditorLayer::OnDetach()
@@ -61,11 +69,7 @@ namespace Hazel
 			HZ_PROFILE_SCOPE("Renderer2D Draw");
 
 #if 1
-			Hazel::Renderer2D::BeginScene(m_CameraController.GetCamera());
-
 			m_ActiveScene->OnUpdate(ts);
-
-			Hazel::Renderer2D::EndScene();
 #endif
 			m_Framebuffer->Unbind();
 		}
@@ -163,11 +167,12 @@ namespace Hazel
 		ImGui::Text("Vertices: %d", stats.GetVertexCount());
 		ImGui::Text("Indices: %d", stats.GetIndexCount());
 
-		if (m_SquareEntity.HasComponent<TagComponent>())
+		//if (m_SquareEntity.HasComponent<TagComponent>())
+		if (m_SquareEntity)
 		{
 			ImGui::Separator();
 			auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
-			ImGui::Text("%s", tag.c_str());
+			ImGui::Text(tag.c_str());
 
 			auto& squareColor = m_SquareEntity.GetComponent<SpriteComponent>().Color;
 			ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(squareColor));

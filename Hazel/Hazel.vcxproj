@@ -181,6 +181,7 @@ copy /B /Y ..\bin\Dist-windows-x86_64\Hazel\Hazel.lib ..\bin\Dist-windows-x86_64
     <ClInclude Include="src\Hazel\Events\MouseEvent.h" />
     <ClInclude Include="src\Hazel\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Hazel\Renderer\Buffer.h" />
+    <ClInclude Include="src\Hazel\Renderer\Camera.h" />
     <ClInclude Include="src\Hazel\Renderer\FrameBuffer.h" />
     <ClInclude Include="src\Hazel\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Hazel\Renderer\OrthoGraphicCamera.h" />

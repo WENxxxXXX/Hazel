@@ -121,6 +121,20 @@ namespace Hazel {
 		delete[] s_Data.QuadVBBase;
 	}
 
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& viewMatrix)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glm::mat4 viewProjectionMatrix = camera.GetProjection() * viewMatrix;
+
+		s_Data.TextureShader->Bind();
+		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+
+		s_Data.QuadIndexCount = 0;
+		s_Data.TextureSlotIndex = 1;
+		s_Data.QuadVBHind = s_Data.QuadVBBase;
+	}
+
 	void Renderer2D::BeginScene(const OrthoGraphicCamera& camera)
 	{
 		HZ_PROFILE_FUNCTION();

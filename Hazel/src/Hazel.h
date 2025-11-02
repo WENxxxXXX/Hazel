@@ -28,6 +28,7 @@
 #include "Hazel/Renderer/SubTexture2D.h"
 #include "Hazel/Renderer/VertexArray.h"
 
+#include "Hazel/Renderer/Camera.h"
 #include "Hazel/Renderer/OrthoGraphicCameraController.h"
 
 ////----Entry Point-----------------

@@ -2,6 +2,8 @@
 
 #include "glm/glm.hpp"
 
+#include "Hazel/Renderer/Camera.h"
+
 namespace Hazel
 {
 
@@ -43,6 +45,19 @@ namespace Hazel
 
 		operator glm::vec4& () { return Color; }
 		operator const glm::vec4& () const { return Color; }
+	};
+
+	struct CameraComponent
+	{
+		Hazel::Camera Camera;
+		bool Primary = false;
+
+		CameraComponent() = default;
+		CameraComponent(const glm::mat4& projection)
+			:Camera(projection) {
+		};
+		CameraComponent(const CameraComponent&) = default;
+
 	};
 
 }
