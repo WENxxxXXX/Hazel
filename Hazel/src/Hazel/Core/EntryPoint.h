@@ -12,15 +12,15 @@ int main(int argc, char** argv)
 
 	HZ_INFO("Goodbye World!");
 
-	HZ_PROFILE_BEGIN_SESSION("Startup", "NutProfile-Startup.json");
+	HZ_PROFILE_BEGIN_SESSION("Startup", "HazelProfile-Startup.json");
 	auto app = Hazel::CreateApplication();
 	HZ_PROFILE_END_SESSION();
 
-	HZ_PROFILE_BEGIN_SESSION("Runtime", "NutProfile-Runtime.json");
+	HZ_PROFILE_BEGIN_SESSION("Runtime", "HazelProfile-Runtime.json");
 	app->Run();
 	HZ_PROFILE_END_SESSION();
 
-	HZ_PROFILE_BEGIN_SESSION("Shutdown", "NutProfile-Shutdown.json");
+	HZ_PROFILE_BEGIN_SESSION("Shutdown", "HazelProfile-Shutdown.json");
 	delete app;
 	HZ_PROFILE_END_SESSION();
 }

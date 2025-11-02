@@ -18,12 +18,9 @@ public:
 	void OnEvent(Hazel::Event& event) override;
 private:
 	Hazel::Ref<Hazel::Texture2D> m_Texture, m_Emoji;
-	Hazel::Ref<Hazel::Texture2D> m_SpriteSheet, m_SpriteSheetRole;
-	Hazel::Ref<Hazel::SubTexture2D> m_Role;
+	Hazel::Ref<Hazel::Texture2D> m_SpriteSheet;
 
 	std::unordered_map<char, Hazel::Ref<Hazel::SubTexture2D>> m_TilesMap;
-
-	Hazel::Ref<Hazel::FrameBuffer> m_Framebuffer;
 
 	Hazel::OrthoGraphicCameraController m_CameraController;
 
