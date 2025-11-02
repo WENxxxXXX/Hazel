@@ -26,7 +26,7 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-#ifdef NUT_DEBUG
+#ifdef HZ_DEBUG
 		//控制OpenGL生成的调试消息的生成和过滤
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

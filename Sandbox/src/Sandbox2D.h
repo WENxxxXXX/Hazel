@@ -23,6 +23,8 @@ private:
 
 	std::unordered_map<char, Hazel::Ref<Hazel::SubTexture2D>> m_TilesMap;
 
+	Hazel::Ref<Hazel::FrameBuffer> m_Framebuffer;
+
 	Hazel::OrthoGraphicCameraController m_CameraController;
 
 	glm::vec4 m_QuadColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };
