@@ -32,6 +32,35 @@ namespace Hazel
 
 	void Scene::OnUpdate(Timestep ts)
 	{
+		// Update scripts
+		m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
+			{
+				bool cameraPrimary;
+				auto cameraView = m_Registry.view<CameraComponent>();
+				for (auto entity : cameraView)
+				{
+					cameraPrimary = cameraView.get<CameraComponent>(entity).Primary;
+				}
+
+				if (!nsc.Instance)
+				{
+					nsc.InstantiateFunction();
+					// 回调函数中的entity是一个uint，记载id,故需要为m_ScriptableEntity调用构造函数，
+					// 传入id和Scene的指针。
+					nsc.Instance->m_ScriptableEntity = Entity{ entity, this };
+
+					if (nsc.OnCreateFunction)
+						nsc.OnCreateFunction(nsc.Instance);
+				}
+
+				// 确保存在有效相机时才可以被脚本更新（比如进行位移）
+				if (nsc.OnUpdateFunction && cameraPrimary)
+				{
+					nsc.OnUpdateFunction(nsc.Instance, ts);
+				}
+			});
+
+		// Render 2D objects
 		Camera* mainCamera = nullptr;
 		glm::mat4* mainTransform = nullptr;
 
