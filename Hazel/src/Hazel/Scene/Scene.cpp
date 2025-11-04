@@ -50,10 +50,10 @@ namespace Hazel
 
 		if (mainCamera) {
 			// Do some rendering (获取当前摄像机的投影矩阵 projection 和 位移矩阵 transform，
-			Renderer2D::BeginScene(*mainCamera, inverse(*mainTransform));
+			Renderer2D::BeginScene(*mainCamera, glm::inverse(*mainTransform));
 
 			// 在所有含有 TransformComponent 的实体中搜集含有 sprite 的实体，group 返回一个类似注册表的实体集合
-			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
+			auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);
 			for (auto entity : group) {
 				auto& [transform, color] = group.get<TransformComponent, SpriteComponent>(entity);
 
@@ -64,5 +64,17 @@ namespace Hazel
 		}
 	}
 
+	void Scene::OnViewportResize(uint32_t width, uint32_t height)
+	{
+		m_ViewportWidth = width;
+		m_ViewportHeight = height;
 
+		auto& view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			auto& cameraComponent = m_Registry.get<CameraComponent>(entity);
+			if (!cameraComponent.FixedAspectRatio)
+				cameraComponent.Camera.ViewportResize(width, height);
+		}
+	}
 }

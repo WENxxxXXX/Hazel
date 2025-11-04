@@ -74,7 +74,7 @@ namespace Hazel {
 		dispathcer.Dispatch<WindowResizeEvent>(HZ_BIND_EVENT_FN(OrthoGraphicCameraController::OnWindowResized));
 	}
 
-	void OrthoGraphicCameraController::Resize(float width, float height)
+	void OrthoGraphicCameraController::OnResize(float width, float height)
 	{
 		m_AspectRatio = width / height;
 		UpdateViewport();

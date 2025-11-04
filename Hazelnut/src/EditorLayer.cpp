@@ -28,11 +28,11 @@ namespace Hazel
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
-		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>(glm::ortho(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f));
+		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>();
 		firstController.Primary = true;
 
 		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
-		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>();
 		secondController.Primary = false;
 	}
 
@@ -50,7 +50,9 @@ namespace Hazel
 			&& m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f)
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_CameraController.Resize(m_ViewportSize.x, m_ViewportSize.y);
+			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 		// Camera Update
 		if (m_ViewportFocused)
@@ -179,8 +181,25 @@ namespace Hazel
 			ImGui::Separator();
 		}
 
+		if (ImGui::Checkbox("World space Camera", &m_PrimaryCamera))
+		{
+			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
+			m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
+		}
+		m_PrimaryCamera == true ? 
+			ImGui::DragFloat3("Camera Transform", 
+				glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : 
+			ImGui::DragFloat3("Camera Transform", 
+				glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
+
+		auto& camera = m_SecondCamera.GetComponent<CameraComponent>().Camera;
+		float orthoSize = camera.GetOrthographicSize();
+		if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
+			camera.SetOrthographicSize(orthoSize);
+
 		ImGui::End();
 
+		// ---------------------------------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
 
