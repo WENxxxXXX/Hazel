@@ -32,42 +32,15 @@ namespace Hazel
 		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
 		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>();
 		firstController.Primary = true;
+		//添加本机脚本
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			
 
 		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
 		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>();
 		secondController.Camera.SetOrthographicSize(5.0f);
 		secondController.Primary = false;
-
-		class CameraController : public ScriptableEntity
-		{
-		public:
-			void OnCreate()
-			{
-
-			}
-
-			void OnDestroy()
-			{
-
-			}
-
-			void OnUpdate(Timestep ts)
-			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
-				float speed = 5.0f;
-
-				if (Input::IsKeyPressed(HZ_KEY_A))
-					transform[3][0] += speed * ts;
-				if (Input::IsKeyPressed(HZ_KEY_D))
-					transform[3][0] -= speed * ts;
-				if (Input::IsKeyPressed(HZ_KEY_W))
-					transform[3][1] -= speed * ts;
-				if (Input::IsKeyPressed(HZ_KEY_S))
-					transform[3][1] += speed * ts;
-			}
-
-		};
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+		//添加本机脚本
+		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();
 	}
 
 	void EditorLayer::OnDetach()
@@ -91,24 +64,18 @@ namespace Hazel
 		// Camera Update
 		if (m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
-		Hazel::Renderer2D::ClearStats();// 每次更新前都要将Stats统计数据清零
+
 		// Render
-		{
-			HZ_PROFILE_SCOPE("RenderCommand Prep");
-			m_Framebuffer->Bind();// 在颜色被设置之前就声明帧缓冲
+		Renderer2D::ClearStats();// 每次更新前都要将Stats统计数据清零
+		m_Framebuffer->Bind();// 在颜色被设置之前就声明帧缓冲
+		RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
+		RendererCommand::Clear();
+		
+		m_ActiveScene->OnUpdate(ts);
+		m_ActiveScene->OnScript(ts);// 更新本机脚本
 
-			Renderer2D::ClearStats();// 每次更新前都要将Stats统计数据清零
-			Hazel::RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-			Hazel::RendererCommand::Clear();
-		}
-		{
-			HZ_PROFILE_SCOPE("Renderer2D Draw");
-
-#if 1
-			m_ActiveScene->OnUpdate(ts);
-#endif
-			m_Framebuffer->Unbind();
-		}
+		m_Framebuffer->Unbind();
+		
 	}
 
 	void EditorLayer::OnImGuiRender()

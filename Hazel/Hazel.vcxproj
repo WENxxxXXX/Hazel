@@ -652,6 +652,7 @@ copy /B /Y ..\bin\Dist-windows-x86_64\Hazel\Hazel.lib ..\bin\Dist-windows-x86_64
     <ClCompile Include="src\Hazel\Scene\Entity.cpp" />
     <ClCompile Include="src\Hazel\Scene\Scene.cpp" />
     <ClCompile Include="src\Hazel\Scene\SceneCamera.cpp" />
+    <ClCompile Include="src\Hazel\Scene\ScriptableEntity.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLFrameBuffer.cpp" />
