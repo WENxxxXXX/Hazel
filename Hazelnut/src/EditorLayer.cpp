@@ -167,7 +167,7 @@ namespace Hazel
 		// ----------- Hierarchy Panel -------------------------------------------
 		m_HierarchyPanel.OnImGuiRender();
 		// ----------- Test Panel---------------------------------------------
-		ImGui::Begin("Test");
+		ImGui::Begin("Settings");
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
@@ -192,11 +192,11 @@ namespace Hazel
 			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
 			m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
 		}
-		m_PrimaryCamera == true ? 
-			ImGui::DragFloat3("Camera Transform", 
-				glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : 
-			ImGui::DragFloat3("Camera Transform", 
-				glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
+		//m_PrimaryCamera == true ? 
+		//	ImGui::DragFloat3("Camera Transform", 
+		//		glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : 
+		//	ImGui::DragFloat3("Camera Transform", 
+		//		glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
 
 		auto& camera = m_SecondCamera.GetComponent<CameraComponent>().Camera;
 		float orthoSize = camera.GetOrthographicSize();

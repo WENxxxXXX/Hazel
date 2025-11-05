@@ -18,6 +18,7 @@ namespace Hazel
 		void OnImGuiRender();
 	private:
 		void DrawEntityNode(Entity entity);
+		void DrawComponents(Entity entity);
 	private:
 		// Active scene is the context, Entity (which is being used) is the selectionContext
 		Ref<Scene> m_Context;

@@ -80,7 +80,7 @@ namespace Hazel
 		// Update scripts（对所有含有 NativeScriptComponent 的组件进行处理，处理方式由 lambda 定义）
 		m_Registry.view<NativeScriptComponent, CameraComponent>().each
 		(
-			[=](auto entity, auto& nsc, auto& cc)// nsc => NativeScriptController, cc => CameraController
+			[=](auto entity, auto& nsc, auto& cc)// nsc => NativeScriptComponent, cc => CameraComponent
 			{
 				if (!nsc.Instance)
 				{
@@ -91,7 +91,7 @@ namespace Hazel
 					nsc.Instance->OnCreate();
 				}
 
-				if (cc.Primary)
+				//if (cc.Primary)
 					nsc.Instance->OnUpdate(ts);
 			}
 		);
