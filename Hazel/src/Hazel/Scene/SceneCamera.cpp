@@ -10,12 +10,26 @@ namespace Hazel
 		UpdateProjection();// 根据初定义的默认数据先更新一次投影矩阵
 	}
 
-	void SceneCamera::SetOrthographic(float orthographicSize, float orthographicNear, float orthographicFar)
+	void SceneCamera::SetOrthographic(float orthographicSize, 
+		float orthographicNear, float orthographicFar)
 	{
+		m_ProjectionType = ProjectionType::Orthographic;
+
 		m_OrthographicSize = orthographicSize;
 		m_OrthographicNear = orthographicNear;
 		m_OrthographicFar = orthographicFar;
 
+		UpdateProjection();
+	}
+
+	void SceneCamera::SetPerspective(float perspectiveVerticalFOV, 
+		float perspectiveNear, float perspectiveFar)
+	{
+		m_ProjectionType = ProjectionType::Perspective;
+
+		m_PerspectiveFOV = perspectiveVerticalFOV;
+		m_PerspectiveNear = perspectiveNear;
+		m_PerspectiveFar = perspectiveFar;
 		UpdateProjection();
 	}
 
@@ -28,12 +42,19 @@ namespace Hazel
 
 	void SceneCamera::UpdateProjection()
 	{
-		float orthoLeft = -m_OrthographicSize * m_AspectRatio * 0.5f;
-		float orthoRight = m_OrthographicSize * m_AspectRatio * 0.5f;
-		float orthoBottom = -m_OrthographicSize * 0.5f;
-		float orthoTop = m_OrthographicSize * 0.5f;
+		if (m_ProjectionType == ProjectionType::Perspective)
+		{
+			m_ProjectionMatrix = glm::perspective(m_PerspectiveFOV, m_AspectRatio, m_PerspectiveNear, m_PerspectiveFar);
+		}
+		else // ProjectionType::Orthographic
+		{
+			float orthoLeft = -m_OrthographicSize * m_AspectRatio * 0.5f;
+			float orthoRight = m_OrthographicSize * m_AspectRatio * 0.5f;
+			float orthoBottom = -m_OrthographicSize * 0.5f;
+			float orthoTop = m_OrthographicSize * 0.5f;
 
-		m_ProjectionMatrix = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, m_OrthographicNear, m_OrthographicFar);
+			m_ProjectionMatrix = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, m_OrthographicNear, m_OrthographicFar);
+		}
 	}
 
 }

@@ -11,20 +11,28 @@ namespace Hazel
 		EditorLayer();
 		virtual ~EditorLayer() = default;
 
+		// For Getting Instance
+		static EditorLayer& Get() { return *s_Instance; }	//使用 * 对指针类型的变量 s_Instance 进行解引用，返回指针变量所指向对象的引用
+
 		void OnAttach() override;
 		void OnDetach() override;
 
 		void OnUpdate(Hazel::Timestep ts) override;
 		void OnImGuiRender() override;
 		void OnEvent(Hazel::Event& event) override;
+	public:
+		glm::vec2 GetImGuiViewportSize() { return m_ViewportSize; };
 	private:
+		// Instance 
+		// s_Instance is a pointer type variable, cuz it takes 'this' pointer and 'nullptr'
+		static EditorLayer* s_Instance;
 		// Scene
 		Hazel::Ref<Hazel::Texture2D> m_Texture, m_Emoji;
 
 		Hazel::Ref<Hazel::FrameBuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
-		Entity m_SquareEntity;
+		Entity m_SquareEntity, m_RedSquare;
 		Entity m_CameraEntity, m_SecondCamera; 
 		bool m_PrimaryCamera = true;
 

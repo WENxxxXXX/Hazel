@@ -9,9 +9,14 @@
 
 namespace Hazel
 {
+	// Initialize s_Instance as null, then give it a value(this pointer) in constructor
+	EditorLayer* EditorLayer::s_Instance = nullptr;
+
 	EditorLayer::EditorLayer()
 		:Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f, true)
 	{
+		HZ_CORE_ASSERT(!s_Instance, "EditorLayer Instance already exists!(EditorLayer is a Singleton!)");
+		s_Instance = this;
 	}
 
 	void EditorLayer::OnAttach()
@@ -26,8 +31,10 @@ namespace Hazel
 		m_CameraController.SetZoomLevel(5.0f);
 
 		m_ActiveScene = CreateRef<Scene>();
-		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
+		m_SquareEntity = m_ActiveScene->CreateEntity("BlueSquare");
 		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
+		m_RedSquare = m_ActiveScene->CreateEntity("RedSquare");
+		m_RedSquare.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.0f, 1.0f, 1.0f });
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
 		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>();

@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "SceneHierarchyPanel.h"
 #include "Hazel/Scene/Component.h"
+#include "../EditorLayer.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -95,6 +96,83 @@ namespace Hazel
 			}
 		}
 
+		if (entity.HasComponent<CameraComponent>())
+		{
+			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+			{
+				auto& cameraComponent = entity.GetComponent<CameraComponent>();
+				auto& camera = cameraComponent.Camera;
+				bool& primary = cameraComponent.Primary;
+				bool& fixedAspectRatio = cameraComponent.FixedAspectRatio;
 
+				//  -------- Draw Check Box --------
+				ImGui::Checkbox("Primary", &primary);
+
+				// Draw Combo Box
+				const char* projectionType[] = { "Perspective", "Orthographic" };
+				const char* currentProjectionType = projectionType[(int)camera.GetProjectionType()];
+				if (ImGui::BeginCombo("Projection", currentProjectionType))		// Combo box preview value needs to be a c_str
+				{
+					// -------- Draw drop-down Selection List --------
+					for (int i = 0; i < 2; i++)
+					{
+						bool isSelected = (projectionType[i] == currentProjectionType);
+						// (What isSelected do:) Is this option is current projection type ? 
+						// Default highlight : Not highlight
+						if (ImGui::Selectable(projectionType[i], isSelected))
+						{
+							// If you select one projection, then update current projection 
+							// type string as latest
+							currentProjectionType = projectionType[i];
+							camera.SetProjectionType((SceneCamera::ProjectionType)i);
+
+							glm::vec2 viewportSize = EditorLayer::Get().GetImGuiViewportSize();
+							// 更新一下viewproject矩阵
+							m_Context->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
+						}
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();// 用于更新焦点（焦点不同于高亮显示）
+					}
+					ImGui::EndCombo();
+				}
+
+				// -------- Draw Perspective Camera Controller --------
+				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
+				{
+					float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
+					if (ImGui::DragFloat("Vertical FOV", &verticalFov))
+						camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
+
+					float perspectiveNear = camera.GetPerspectiveNearClip();
+					if (ImGui::DragFloat("Near", &perspectiveNear))
+						camera.SetPerspectiveNearClip(perspectiveNear);
+
+					float perspectiveFar = camera.GetPerspectiveFarClip();
+					if (ImGui::DragFloat("Far", &perspectiveFar))
+						camera.SetPerspectiveFarClip(perspectiveFar);
+				}
+
+				// -------- Draw Orthographic Camera Controller --------
+				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
+				{
+					ImGui::Checkbox("Fixed Aspect Ratio", &fixedAspectRatio);
+
+					float orthoSize = camera.GetOrthographicSize();
+					if (ImGui::DragFloat("Size", &orthoSize))
+						camera.SetOrthographicSize(orthoSize);
+
+					float orthoNear = camera.GetOrthographicNearClip();
+					if (ImGui::DragFloat("Near", &orthoNear))
+						camera.SetOrthographicNearClip(orthoNear);
+
+					float orthoFar = camera.GetOrthographicFarClip();
+					if (ImGui::DragFloat("Far", &orthoFar))
+						camera.SetOrthographicFarClip(orthoFar);
+				}
+
+				ImGui::TreePop();
+			}
+		}
 	}
 }
