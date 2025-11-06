@@ -141,7 +141,7 @@ namespace Hazel
 				if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
 				{
 					float verticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-					if (ImGui::DragFloat("Vertical FOV", &verticalFov))
+					if (ImGui::DragFloat("Vertical FOV", &verticalFov, 1.0f, 30.0f, 120.0f))
 						camera.SetPerspectiveVerticalFOV(glm::radians(verticalFov));
 
 					float perspectiveNear = camera.GetPerspectiveNearClip();
@@ -171,6 +171,17 @@ namespace Hazel
 						camera.SetOrthographicFarClip(orthoFar);
 				}
 
+				ImGui::TreePop();
+			}
+		}
+
+		if (entity.HasComponent<SpriteComponent>())
+		{
+			if (ImGui::TreeNodeEx((void*)typeid(SpriteComponent).hash_code(), 
+				ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			{
+				auto& controller = entity.GetComponent<SpriteComponent>();
+				ImGui::ColorEdit4("Color", glm::value_ptr(controller.Color));
 				ImGui::TreePop();
 			}
 		}

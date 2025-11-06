@@ -174,41 +174,13 @@ namespace Hazel
 		// ----------- Hierarchy Panel -------------------------------------------
 		m_HierarchyPanel.OnImGuiRender();
 		// ----------- Test Panel---------------------------------------------
-		ImGui::Begin("Settings");
+		ImGui::Begin("Status");
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Renderer2D Stats:");
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetVertexCount());
 		ImGui::Text("Indices: %d", stats.GetIndexCount());
-
-		//if (m_SquareEntity.HasComponent<TagComponent>())
-		if (m_SquareEntity)
-		{
-			ImGui::Separator();
-			auto& tag = m_SquareEntity.GetComponent<TagComponent>().Tag;
-			ImGui::Text(tag.c_str());
-
-			auto& squareColor = m_SquareEntity.GetComponent<SpriteComponent>().Color;
-			ImGui::ColorEdit4("Square Color Edit", glm::value_ptr(squareColor));
-			ImGui::Separator();
-		}
-
-		if (ImGui::Checkbox("World space Camera", &m_PrimaryCamera))
-		{
-			m_CameraEntity.GetComponent<CameraComponent>().Primary = m_PrimaryCamera;
-			m_SecondCamera.GetComponent<CameraComponent>().Primary = !m_PrimaryCamera;
-		}
-		//m_PrimaryCamera == true ? 
-		//	ImGui::DragFloat3("Camera Transform", 
-		//		glm::value_ptr(m_CameraEntity.GetComponent<TransformComponent>().Transform[3])) : 
-		//	ImGui::DragFloat3("Camera Transform", 
-		//		glm::value_ptr(m_SecondCamera.GetComponent<TransformComponent>().Transform[3]));
-
-		auto& camera = m_SecondCamera.GetComponent<CameraComponent>().Camera;
-		float orthoSize = camera.GetOrthographicSize();
-		if (ImGui::DragFloat("Second Camera Ortho Size", &orthoSize))
-			camera.SetOrthographicSize(orthoSize);
 
 		ImGui::End();
 
