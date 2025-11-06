@@ -4,6 +4,7 @@
 #include "../EditorLayer.h"
 
 #include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Hazel
@@ -74,23 +75,42 @@ namespace Hazel
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-			// Clear old data and then fill with new data
-			char buffer[256];
-			memset(buffer, 0, sizeof(buffer));
-			strcpy_s(buffer, sizeof(buffer), tag.c_str());		// It's Safer than strcpy() :)
-			if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
+			if (ImGui::TreeNodeEx((void*)typeid(TagComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Tag"))
 			{
-				// Update tag, so next time when we copy string from tag, the buffer data will be init by latest string
-				tag = std::string(buffer);
-			};
+				ImGui::Columns(2);
+				ImGui::SetColumnWidth(0, 100.0f);
+				ImGui::Text("Tagname");
+
+				ImGui::NextColumn();
+				// Clear old data and then fill with new data
+				char buffer[256];
+				memset(buffer, 0, sizeof(buffer));
+				strcpy_s(buffer, sizeof(buffer), tag.c_str());		// It's Safer than strcpy() :)
+				if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+				{
+					// Update tag, so next time when we copy string from tag, the buffer data will be init by latest string
+					tag = std::string(buffer);
+				};
+
+				ImGui::Columns(1);
+
+				ImGui::TreePop();
+			}
 		}
 
 		if (entity.HasComponent<TransformComponent>())
 		{
 			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
 			{
-				auto& transform = entity.GetComponent<TransformComponent>().Transform;
-				ImGui::DragFloat3("Position", glm::value_ptr(transform[3]), 0.1f);
+				auto& tc = entity.GetComponent<TransformComponent>();
+				
+				DrawVec3Controller("Translation", tc.Translation);
+
+				glm::vec3 rotation = glm::degrees(tc.Rotation);	// Check the notes to learn more
+				DrawVec3Controller("Rotation", rotation);
+				tc.Rotation = glm::radians(rotation);
+
+				DrawVec3Controller("Scale", tc.Scale, 1.0f);	// Scale will be reset but at least 1.0f
 
 				ImGui::TreePop();
 			}
@@ -185,5 +205,70 @@ namespace Hazel
 				ImGui::TreePop();
 			}
 		}
+	}
+
+	void SceneHierarchyPanel::DrawVec3Controller(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)
+	{
+		ImGui::PushID(label.c_str());
+
+		ImGui::Columns(2);
+		ImGui::SetColumnWidth(0, columnWidth);
+		ImGui::Text(label.c_str());
+
+		ImGui::NextColumn();
+		{
+			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+			ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+			ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());		// PopItemWidth as many as you set (Why components is 3?and which 3 components it control? what the specification of determine which component you want to manage?
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0,0 });
+			// --------- x -----------
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.6f, 0.1f, 0.0f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.1f, 0.0f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.6f, 0.1f, 0.0f, 1.0f });
+			if (ImGui::Button("X", buttonSize))
+			{
+				values.x = resetValue;
+			}
+			ImGui::PopStyleColor(3);// PopStyleColor as many as you set
+
+			ImGui::SameLine();
+			ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();// PopItemWidth()
+			// ---------- y -----------
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.6f, 0.1f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.0f, 0.9f, 0.1f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.6f, 0.1f, 1.0f });
+			if (ImGui::Button("Y", buttonSize))
+			{
+				values.y = resetValue;
+			}
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+			// ----------- z ------------
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.0f, 0.6f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.1f, 0.0f, 0.9f, 1.0f });
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.0f, 0.6f, 1.0f });
+			if (ImGui::Button("Z", buttonSize))
+			{
+				values.z = resetValue;
+			}
+			ImGui::PopStyleColor(3);
+
+			ImGui::SameLine();
+			ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+			ImGui::PopItemWidth();
+
+			ImGui::PopStyleVar();
+		}
+
+		ImGui::Columns(1);		// Rostore column status as 1 column
+
+		ImGui::PopID();
 	}
 }
