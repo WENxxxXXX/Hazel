@@ -37,16 +37,44 @@ namespace Hazel
 		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 			m_SelectionContext = {};
 
+		// Right-click on blank space of the window
+		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))	// Disable 'ContextWindow' from covering previous 'ContextItem Menu'(Which was in SceneHierarchyPanel::DrawEntityNode)
+		{
+			if (ImGui::MenuItem("Create Empty Entity"))
+				m_Context->CreateEntity("Empty Entity");
+			ImGui::EndPopup();
+		}
+
 		ImGui::End();
 
 		ImGui::Begin("Properties");
 		if (m_SelectionContext)
+		{
 			DrawComponents(m_SelectionContext);
+
+			// Draw "add component menu"
+			if (ImGui::Button("AddComponent"))
+				ImGui::OpenPopup("AddComponentMenu");
+			if (ImGui::BeginPopup("AddComponentMenu"))
+			{
+				if (ImGui::MenuItem("CameraComponent"))
+				{
+					m_SelectionContext.AddComponent<CameraComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				if (ImGui::MenuItem("SpriteRendererComponent"))
+				{
+					m_SelectionContext.AddComponent<SpriteComponent>();
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
+			}
+		}
 
 		ImGui::End();
 	}
 
-	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
+	void SceneHierarchyPanel::DrawEntityNode(Entity& entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
@@ -56,6 +84,20 @@ namespace Hazel
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 		if (ImGui::IsItemClicked())
 			m_SelectionContext = entity;
+
+		// If you do not mark this temporary variable "deleted" as true(After this code: ImGui::MenuItem), 
+		// but delete the entity directly in the ContextItem Menu, 
+		// the program will crash because it is still using the previously deleted entity 
+		// (in the conditional judgment of the second tree node rendering)
+		bool entityDeleted = false;
+		if (ImGui::BeginPopupContextItem())
+		{
+			// Define this menu according to your needs
+			if (ImGui::MenuItem("Delete Entity"))
+				entityDeleted = true;
+
+			ImGui::EndPopup();
+		}
 
 		if (opened)
 		{
@@ -67,9 +109,15 @@ namespace Hazel
 
 			ImGui::TreePop();
 		}
+
+		if (entityDeleted) {
+			m_Context->DestroyEntity(entity);
+			if (entity == m_SelectionContext)
+				m_SelectionContext = {};
+		}
 	}
 
-	void SceneHierarchyPanel::DrawComponents(Entity entity)
+	void SceneHierarchyPanel::DrawComponents(Entity& entity)
 	{
 		if (entity.HasComponent<TagComponent>())
 		{
@@ -197,18 +245,44 @@ namespace Hazel
 
 		if (entity.HasComponent<SpriteComponent>())
 		{
-			if (ImGui::TreeNodeEx((void*)typeid(SpriteComponent).hash_code(), 
-				ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer"))
+			bool open = ImGui::TreeNodeEx((void*)typeid(SpriteComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer");
+
+			// Draw component settings menu(including remove button)
+			float buttonWidth = ImGui::CalcTextSize("+").x + GImGui->Style.FramePadding.x * 2.0f;
+			float buttonHeight = ImGui::CalcTextSize("+").y + GImGui->Style.FramePadding.y * 2.0f;
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
+			if (ImGui::Button("+", { buttonWidth, buttonHeight })) {
+				ImGui::OpenPopup("ComponentSettings");
+			}
+
+			bool deleted = false;
+			if (ImGui::BeginPopup("ComponentSettings")) {
+				if (ImGui::MenuItem("Remove component"))
+					deleted = true;
+
+				ImGui::EndPopup();
+			}
+
+			if (open)
 			{
 				auto& controller = entity.GetComponent<SpriteComponent>();
 				ImGui::ColorEdit4("Color", glm::value_ptr(controller.Color));
 				ImGui::TreePop();
+			}
+
+			if (deleted) 
+			{
+				entity.RemoveComponent<SpriteComponent>();
 			}
 		}
 	}
 
 	void SceneHierarchyPanel::DrawVec3Controller(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)
 	{
+		ImGuiIO& io = ImGui::GetIO();
+		auto boldFont = io.Fonts->Fonts[0];
+
 		ImGui::PushID(label.c_str());
 
 		ImGui::Columns(2);
@@ -226,10 +300,12 @@ namespace Hazel
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.6f, 0.1f, 0.0f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.9f, 0.1f, 0.0f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.6f, 0.1f, 0.0f, 1.0f });
+			ImGui::PushFont(boldFont);
 			if (ImGui::Button("X", buttonSize))
 			{
 				values.x = resetValue;
 			}
+			ImGui::PopFont();
 			ImGui::PopStyleColor(3);// PopStyleColor as many as you set
 
 			ImGui::SameLine();
@@ -240,10 +316,12 @@ namespace Hazel
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f, 0.6f, 0.1f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.0f, 0.9f, 0.1f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.0f, 0.6f, 0.1f, 1.0f });
+			ImGui::PushFont(boldFont);
 			if (ImGui::Button("Y", buttonSize))
 			{
 				values.y = resetValue;
 			}
+			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
@@ -254,10 +332,12 @@ namespace Hazel
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.1f, 0.0f, 0.6f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{ 0.1f, 0.0f, 0.9f, 1.0f });
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{ 0.1f, 0.0f, 0.6f, 1.0f });
+			ImGui::PushFont(boldFont);
 			if (ImGui::Button("Z", buttonSize))
 			{
 				values.z = resetValue;
 			}
+			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
 
 			ImGui::SameLine();
