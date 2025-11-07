@@ -220,7 +220,7 @@ namespace Hazel
 			float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
 			ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
-			ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());		// PopItemWidth as many as you set (Why components is 3?and which 3 components it control? what the specification of determine which component you want to manage?
+			ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{ 0,0 });
 			// --------- x -----------
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.6f, 0.1f, 0.0f, 1.0f });
