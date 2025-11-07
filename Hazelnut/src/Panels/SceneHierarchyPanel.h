@@ -23,6 +23,10 @@ namespace Hazel
 		void DrawComponents(Entity& entity);
 		static void DrawVec3Controller(const std::string& label, glm::vec3& values, 
 			float resetValue = 0.0f, float columnWidth = 100.0f);
+
+		template<typename T, typename UIFunction>
+		static void DrawComponent(const std::string& name, Entity& entity, UIFunction func);
+
 	private:
 		// Active scene is the context, Entity (which is being used) is the selectionContext
 		Ref<Scene> m_Context;

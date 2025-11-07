@@ -79,7 +79,8 @@ namespace Hazel
 		auto& tag = entity.GetComponent<TagComponent>().Tag;
 
 		// Draw first TreeNode
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | 
+			ImGuiTreeNodeFlags_SpanAvailWidth |
 			((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0);
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 		if (ImGui::IsItemClicked())
@@ -102,7 +103,8 @@ namespace Hazel
 		if (opened)
 		{
 			// Draw nested TreeNode
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | 
+				ImGuiTreeNodeFlags_SpanAvailWidth;
 			bool opened = ImGui::TreeNodeEx((void*)666999, flags, tag.c_str());
 			if (opened)
 				ImGui::TreePop();
@@ -119,6 +121,8 @@ namespace Hazel
 
 	void SceneHierarchyPanel::DrawComponents(Entity& entity)
 	{
+		// For Tag component, we not use template function: SceneHierarchyPanel::DrawComponent, 
+		// because it cannot be deleted.
 		if (entity.HasComponent<TagComponent>())
 		{
 			auto& tag = entity.GetComponent<TagComponent>().Tag;
@@ -146,61 +150,46 @@ namespace Hazel
 			}
 		}
 
-		if (entity.HasComponent<TransformComponent>())
-		{
-			if (ImGui::TreeNodeEx((void*)typeid(TransformComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Transform"))
+		DrawComponent<TransformComponent>("Transform", entity, [](auto& component)
 			{
-				auto& tc = entity.GetComponent<TransformComponent>();
-				
-				DrawVec3Controller("Translation", tc.Translation);
+				DrawVec3Controller("Translation", component.Translation);
 
-				glm::vec3 rotation = glm::degrees(tc.Rotation);	// Check the notes to learn more
+				glm::vec3 rotation = glm::degrees(component.Rotation);	// Check the notes to learn more
 				DrawVec3Controller("Rotation", rotation);
-				tc.Rotation = glm::radians(rotation);
+				component.Rotation = glm::radians(rotation);
 
-				DrawVec3Controller("Scale", tc.Scale, 1.0f);	// Scale will be reset but at least 1.0f
+				DrawVec3Controller("Scale", component.Scale, 1.0f);	// Scale will be reset but at least 1.0f
+			});
 
-				ImGui::TreePop();
-			}
-		}
-
-		if (entity.HasComponent<CameraComponent>())
-		{
-			if (ImGui::TreeNodeEx((void*)typeid(CameraComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Camera"))
+		// I passed 'This pointer' though lambda expression (because I use Non-static member variables: m_Context,I need to specify the capture method)
+		DrawComponent<CameraComponent>("Camera", entity, [this](auto& component)
 			{
-				auto& cameraComponent = entity.GetComponent<CameraComponent>();
-				auto& camera = cameraComponent.Camera;
-				bool& primary = cameraComponent.Primary;
-				bool& fixedAspectRatio = cameraComponent.FixedAspectRatio;
+				auto& camera = component.Camera;
+				bool& primary = component.Primary;
+				bool& fixedAspectRatio = component.FixedAspectRatio;
 
 				//  -------- Draw Check Box --------
 				ImGui::Checkbox("Primary", &primary);
-
-				// Draw Combo Box
+				// --------- Draw Combo Box --------
 				const char* projectionType[] = { "Perspective", "Orthographic" };
 				const char* currentProjectionType = projectionType[(int)camera.GetProjectionType()];
-				if (ImGui::BeginCombo("Projection", currentProjectionType))		// Combo box preview value needs to be a c_str
+				if (ImGui::BeginCombo("Projection", currentProjectionType))			// Combo box preview value needs to be a c_str
 				{
 					// -------- Draw drop-down Selection List --------
 					for (int i = 0; i < 2; i++)
 					{
 						bool isSelected = (projectionType[i] == currentProjectionType);
-						// (What isSelected do:) Is this option is current projection type ? 
-						// Default highlight : Not highlight
-						if (ImGui::Selectable(projectionType[i], isSelected))
+						if (ImGui::Selectable(projectionType[i], isSelected))		// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
 						{
-							// If you select one projection, then update current projection 
-							// type string as latest
-							currentProjectionType = projectionType[i];
+							currentProjectionType = projectionType[i];				// If you select one projection, then update current projection type string as latest
 							camera.SetProjectionType((SceneCamera::ProjectionType)i);
 
 							glm::vec2 viewportSize = EditorLayer::Get().GetImGuiViewportSize();
-							// 更新一下viewproject矩阵
 							m_Context->OnViewportResize((uint32_t)viewportSize.x, (uint32_t)viewportSize.y);
 						}
 
 						if (isSelected)
-							ImGui::SetItemDefaultFocus();// 用于更新焦点（焦点不同于高亮显示）
+							ImGui::SetItemDefaultFocus();	// 用于更新焦点（焦点不同于高亮显示）
 					}
 					ImGui::EndCombo();
 				}
@@ -238,43 +227,49 @@ namespace Hazel
 					if (ImGui::DragFloat("Far", &orthoFar))
 						camera.SetOrthographicFarClip(orthoFar);
 				}
+			});
 
-				ImGui::TreePop();
-			}
-		}
+		DrawComponent<SpriteComponent>("Sprite Renderer", entity, [](auto& component)
+			{
+				ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+			});
+	}
 
-		if (entity.HasComponent<SpriteComponent>())
+	// ------------------------ Some definitions ------------------------------------------
+	template<typename T, typename UIFunction>
+	static void SceneHierarchyPanel::DrawComponent(const std::string& name, Entity& entity, UIFunction uiFunc)
+	{
+		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap;
+
+		if (entity.HasComponent<T>())
 		{
-			bool open = ImGui::TreeNodeEx((void*)typeid(SpriteComponent).hash_code(), ImGuiTreeNodeFlags_DefaultOpen, "Sprite Renderer");
+			auto& component = entity.GetComponent<T>();
 
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
 			// Draw component settings menu(including remove button)
 			float buttonWidth = ImGui::CalcTextSize("+").x + GImGui->Style.FramePadding.x * 2.0f;
 			float buttonHeight = ImGui::CalcTextSize("+").y + GImGui->Style.FramePadding.y * 2.0f;
-
 			ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);
 			if (ImGui::Button("+", { buttonWidth, buttonHeight })) {
 				ImGui::OpenPopup("ComponentSettings");
 			}
 
-			bool deleted = false;
+			bool removeComponent = false;
 			if (ImGui::BeginPopup("ComponentSettings")) {
 				if (ImGui::MenuItem("Remove component"))
-					deleted = true;
+					removeComponent = true;
 
 				ImGui::EndPopup();
 			}
 
 			if (open)
 			{
-				auto& controller = entity.GetComponent<SpriteComponent>();
-				ImGui::ColorEdit4("Color", glm::value_ptr(controller.Color));
+				uiFunc(component);
 				ImGui::TreePop();
 			}
 
-			if (deleted) 
-			{
-				entity.RemoveComponent<SpriteComponent>();
-			}
+			if (removeComponent)
+				entity.RemoveComponent<T>();
 		}
 	}
 
