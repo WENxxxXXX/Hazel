@@ -75,6 +75,10 @@ namespace Hazel
 		RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RendererCommand::Clear();
 
+		// Clear entity ID to -1
+		m_Framebuffer->ClearAttachment(1, -1);
+
+		// Update scene
 		// Now we just update EditorCamera Hazelnut APP, rather than RuntimeCamera in game
 		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 		//m_ActiveScene->OnScript(ts);// 更新本机脚本

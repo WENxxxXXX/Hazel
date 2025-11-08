@@ -22,6 +22,16 @@ namespace Utils
 		return false;
 	}
 
+	static GLenum HazelTexFormatToGL(Hazel::FrameBufferAttachmentFormat format)
+	{
+		switch (format)
+		{
+		case Hazel::FrameBufferAttachmentFormat::RGBA8:	return GL_RGBA8;
+		case Hazel::FrameBufferAttachmentFormat::RED_INTEGER: return GL_RED_INTEGER;
+		}
+		return 0;
+	}
+
 	static void CreateTextures(bool multisampled, uint32_t count, uint32_t* id)
 	{
 		glCreateTextures(TextureTarget(multisampled), count, id);
@@ -204,4 +214,15 @@ namespace Hazel
 
 		return pixelData;
 	}
+
+	void OpenGLFrameBuffer::ClearAttachment(uint32_t attachmentIndex, int value)
+	{
+		HZ_CORE_ASSERT((attachmentIndex < m_ColorAttachmentIDs.size()), 
+			"Make sure that attachment_index you typed is in the scope of Attachments which we set ")
+
+		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
+		glClearTexImage(m_ColorAttachmentIDs[attachmentIndex], 0, GL_RED_INTEGER, GL_INT, &value);
+	}
+
+
 }
