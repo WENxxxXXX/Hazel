@@ -37,25 +37,8 @@ namespace Hazel
 		m_CameraController.SetZoomLevel(5.0f);
 
 		m_ActiveScene = CreateRef<Scene>();
-#if 0
-		m_SquareEntity = m_ActiveScene->CreateEntity("BlueSquare");
-		m_SquareEntity.AddComponent<SpriteComponent>(glm::vec4{ 0.0f, 1.0f, 1.0f, 1.0f });
-		m_RedSquare = m_ActiveScene->CreateEntity("RedSquare");
-		m_RedSquare.AddComponent<SpriteComponent>(glm::vec4{ 1.0f, 0.0f, 1.0f, 1.0f });
 
-		m_CameraEntity = m_ActiveScene->CreateEntity("Main-Camera");
-		auto& firstController = m_CameraEntity.AddComponent<CameraComponent>();
-		firstController.Primary = true;
-		//添加本机脚本
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();			
-
-		m_SecondCamera = m_ActiveScene->CreateEntity("Clip-Camera");
-		auto& secondController = m_SecondCamera.AddComponent<CameraComponent>();
-		secondController.Camera.SetOrthographicSize(5.0f);
-		secondController.Primary = false;
-		//添加本机脚本
-		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();
-#endif
+		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
@@ -76,19 +59,23 @@ namespace Hazel
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+
+			m_EditorCamera.SetViewportSize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 		// Camera Update
 		if (m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
+		m_EditorCamera.OnUpdate(ts);
 
 		// Render
 		Renderer2D::ClearStats();// 每次更新前都要将Stats统计数据清零
 		m_Framebuffer->Bind();// 在颜色被设置之前就声明帧缓冲
 		RendererCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
 		RendererCommand::Clear();
-		
-		m_ActiveScene->OnUpdate(ts);
-		m_ActiveScene->OnScript(ts);// 更新本机脚本
+
+		// Now we just update EditorCamera Hazelnut APP, rather than RuntimeCamera in game
+		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+		//m_ActiveScene->OnScript(ts);// 更新本机脚本
 
 		m_Framebuffer->Unbind();
 		
@@ -230,12 +217,19 @@ namespace Hazel
 
 			// Get camera projection matrix & camera view matrix & transform matrix
 			Entity cameraEntity = m_ActiveScene->GetPrimaryCamera();
+
+#if 0		// Draw gizmos for the entities we create in Actual-Game(Which will use Runtime camera to check things)
 			// Camera Projection
 			const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
 			const auto& cameraProjection = camera.GetProjection();
 			// Camera View
 			auto& cameraTransform = cameraEntity.GetComponent<TransformComponent>().GetTransform();
 			glm::mat4 cameraView = glm::inverse(cameraTransform);
+#endif
+#if 1		// Draw gizmos for the entities we create in Nut-Editor(Which will use Editor camera to check things)
+			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+			const glm::mat4& cameraView = m_EditorCamera.GetViewMatrix();
+#endif
 			// Transform
 			auto& tc = selectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 transform = tc.GetTransform();
@@ -276,6 +270,7 @@ namespace Hazel
 	void EditorLayer::OnEvent(Hazel::Event& event)
 	{
 		m_CameraController.OnEvent(event);
+		m_EditorCamera.OnEvent(event);
 
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
