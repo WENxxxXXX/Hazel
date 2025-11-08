@@ -12,6 +12,11 @@ project "Hazelnut"
         "src/**.h",
         "src/**.cpp"
     }
+    
+    defines
+    {
+        "YAML_CPP_STATIC_DEFINE"
+    }
 
     includedirs                      
     {
@@ -19,7 +24,8 @@ project "Hazelnut"
         "%{wks.location}/Hazel/src",
         "%{wks.location}/Hazel/vendor",
         "%{IncludeDir.glm}",
-        "%{IncludeDir.entt}"
+        "%{IncludeDir.entt}",
+        "%{IncludeDir.yaml_cpp}"
     }
 
     links
