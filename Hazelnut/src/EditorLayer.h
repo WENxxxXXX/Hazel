@@ -51,5 +51,8 @@ namespace Hazel
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+
+		//Gizmo
+		int m_GizmoType = -1;
 	};
 }
