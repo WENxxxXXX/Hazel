@@ -2,6 +2,7 @@
 
 #include "Hazel/Scene/ScriptableEntity.h"
 #include "Hazel/Scene/SceneSerializer.h"
+#include "Hazel/Utils/PlatformUtils.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -51,7 +52,7 @@ namespace Hazel
 		//添加本机脚本
 		m_SecondCamera.AddComponent<NativeScriptComponent>().Bind<ScriptCameraController>();
 #endif
-		m_HierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -167,17 +168,14 @@ namespace Hazel
 				if (ImGui::MenuItem("Flag: NoResize", "", (dockspace_flags & ImGuiDockNodeFlags_NoResize) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_NoResize; }
 				if (ImGui::MenuItem("Flag: AutoHideTabBar", "", (dockspace_flags & ImGuiDockNodeFlags_AutoHideTabBar) != 0)) { dockspace_flags ^= ImGuiDockNodeFlags_AutoHideTabBar; }
 				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }*/
-				if (ImGui::MenuItem("SaveToFile")) 
-				{ 
-					SceneSerializer serializer(m_ActiveScene);  
-					serializer.SceneSerializer::Serialize("assets/scenes/Example.yaml"); 
-				}
-				if (ImGui::MenuItem("LoadFromFile")) 
-				{ 
-					SceneSerializer serializer(m_ActiveScene);  
-					serializer.SceneSerializer::Deserialize("assets/scenes/Example.yaml"); 
-				}
-				if (ImGui::MenuItem("Exit")) { Application::Get().WindowClose(); }
+				if (ImGui::MenuItem("New", "Ctrl + N"))
+					NewScene();
+				if (ImGui::MenuItem("Save As...", "Ctrl + S"))
+					SaveSceneAs();
+				if (ImGui::MenuItem("Open...", "Ctrl + O"))
+					OpenScene();
+				if (ImGui::MenuItem("Exit"))
+					Application::Get().WindowClose();
 
 				/*ImGui::Separator();
 				if (ImGui::MenuItem("Close", NULL, false))
@@ -190,7 +188,7 @@ namespace Hazel
 
 		// -- Should be writen in Dockspace( Between dockspace's ImGui::Begin() <-> ImGui::End() ) --
 		// ----------- Hierarchy Panel -------------------------------------------
-		m_HierarchyPanel.OnImGuiRender();
+		m_SceneHierarchyPanel.OnImGuiRender();
 		// ----------- Test Panel---------------------------------------------
 		ImGui::Begin("Status");
 		auto stats = Renderer2D::GetStats();
@@ -223,6 +221,77 @@ namespace Hazel
 	void EditorLayer::OnEvent(Hazel::Event& event)
 	{
 		m_CameraController.OnEvent(event);
+
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressedEvent>(HZ_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 	}
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& event)
+	{
+		// You can triggering this event only once,
+		// because if you try to tirgger this event again, 
+		// the event.GetRepeatCount will biger than 0.
+		// And function will return false
+		if (event.IsRepeat())
+			return false;
+
+		bool ctrl = Input::IsKeyPressed(HZ_KEY_LEFT_CONTROL) || 
+			Input::IsKeyPressed(HZ_KEY_RIGHT_CONTROL);
+		bool shift = Input::IsKeyPressed(HZ_KEY_LEFT_SHIFT) || 
+			Input::IsKeyPressed(HZ_KEY_RIGHT_SHIFT);
+		switch (event.GetKeyCode())
+		{
+		case HZ_KEY_N: {
+			if (ctrl)
+				NewScene();
+
+			break;
+		}
+		case HZ_KEY_O: {
+			if (ctrl)
+				OpenScene();
+
+			break;
+		}
+		case HZ_KEY_S: {
+			if (ctrl && shift)
+				SaveSceneAs();
+
+			break;
+		}
+		}
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::string filepath = FileDialogs::OpenFile("Hazel Scene(*.yaml)\0 * .yaml\0All Files (*.*)\0*.*\0\0");	// ????why filedialogs need to return string
+		if (!filepath.empty())
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(filepath);
+		}
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::string filepath = FileDialogs::SaveFile("Hazel Scene()(*.yaml)\0 * .yaml\0");
+		if (!filepath.empty())
+		{
+			SceneSerializer deserializer(m_ActiveScene);
+			deserializer.Serialize(filepath);
+		}
+	}
+
 }
 

@@ -158,7 +158,7 @@ namespace Hazel
     // ---------------------------------------------------------
     // ------------------- Some definations --------------------
     // ---------------------------------------------------------
-    void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity)
+    void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity& entity)
     {
         out << YAML::BeginMap; // Entity
         out << YAML::Key << "Entity" << YAML::Value << "256257383941";          // TODO: Entity ID goes here
@@ -187,17 +187,6 @@ namespace Hazel
             out << YAML::EndMap;
         }
 
-        if (entity.HasComponent<SpriteComponent>())
-        {
-            out << YAML::Key << "SpriteComponent";
-            out << YAML::BeginMap;
-
-            auto& color = entity.GetComponent<SpriteComponent>().Color;
-            out << YAML::Key << "Color" << YAML::Value << color;
-
-            out << YAML::EndMap;
-        }
-
         if (entity.HasComponent<CameraComponent>())
         {
             out << YAML::Key << "CameraComponent";
@@ -218,10 +207,21 @@ namespace Hazel
                 out << YAML::EndMap;
             }
             out << YAML::Key << "Primary" << YAML::Value << cc.Primary;
-            out << YAML::Key << "Fixed Aspect Ratio" << YAML::Value << cc.FixedAspectRatio;
+            out << YAML::Key << "FixedAspectRatio" << YAML::Value << cc.FixedAspectRatio;
 
             out << YAML::EndMap;
 
+        }
+
+        if (entity.HasComponent<SpriteComponent>())
+        {
+            out << YAML::Key << "SpriteComponent";
+            out << YAML::BeginMap;
+
+            auto& color = entity.GetComponent<SpriteComponent>().Color;
+            out << YAML::Key << "Color" << YAML::Value << color;
+
+            out << YAML::EndMap;
         }
 
         out << YAML::EndMap;
@@ -236,8 +236,8 @@ namespace Hazel
         {
             auto& tc = entity.GetComponent<TransformComponent>();
             tc.Translation = transformComponent["Translation"].as<glm::vec3>();
-            tc.Translation = transformComponent["Rotation"].as<glm::vec3>();
-            tc.Translation = transformComponent["Scale"].as<glm::vec3>();
+            tc.Rotation = transformComponent["Rotation"].as<glm::vec3>();
+            tc.Scale = transformComponent["Scale"].as<glm::vec3>();
         }
 
         auto cameraComponent = data["CameraComponent"];
@@ -256,7 +256,7 @@ namespace Hazel
             // Unlike Camera, Primary is a separate key-value mapping, 
             // while Camera is a map that requires further access.
             cc.Primary = cameraComponent["Primary"].as<bool>();
-            cc.FixedAspectRatio = cameraComponent["Fixed Aspect Ratio"].as<bool>();
+            cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
         }
 
         auto spriteComponent = data["SpriteComponent"];

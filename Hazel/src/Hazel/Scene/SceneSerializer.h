@@ -18,7 +18,7 @@ namespace Hazel
 		bool DeserializeRuntime(const std::string& filepath);
 
 	private:
-		void SerializeEntity(YAML::Emitter& out, Entity entity);
+		void SerializeEntity(YAML::Emitter& out, Entity& entity);
 		void DeserializeEntity(YAML::detail::iterator_value& data, Entity& entity);
 	private:
 		Ref<Scene> m_Scene;

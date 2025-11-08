@@ -17,7 +17,7 @@ Entities:
         OrthographicNear: -1
         OrthographicFar: 1
       Primary: false
-      Fixed Aspect Ratio: false
+      FixedAspectRatio: false
   - Entity: 256257383941
     TagComponent:
       Tag: Main-Camera
@@ -35,12 +35,12 @@ Entities:
         OrthographicNear: -1
         OrthographicFar: 1
       Primary: true
-      Fixed Aspect Ratio: false
+      FixedAspectRatio: false
   - Entity: 256257383941
     TagComponent:
       Tag: RedSquare
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [0, 2.5, 0]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     SpriteComponent:

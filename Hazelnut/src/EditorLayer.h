@@ -21,7 +21,13 @@ namespace Hazel
 		void OnImGuiRender() override;
 		void OnEvent(Hazel::Event& event) override;
 	public:
+		bool OnKeyPressed(KeyPressedEvent& event);
+
 		glm::vec2 GetImGuiViewportSize() { return m_ViewportSize; };
+
+		void NewScene();
+		void OpenScene();
+		void SaveSceneAs();
 	private:
 		// Instance 
 		// s_Instance is a pointer type variable, cuz it takes 'this' pointer and 'nullptr'
@@ -44,6 +50,6 @@ namespace Hazel
 		glm::vec4 m_QuadColor = { 0.5412f, 0.1686f, 0.8863f, 1.0f };
 
 		// Panels
-		SceneHierarchyPanel m_HierarchyPanel;
+		SceneHierarchyPanel m_SceneHierarchyPanel;
 	};
 }
