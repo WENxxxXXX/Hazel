@@ -221,7 +221,8 @@ namespace Hazel
 			"Make sure that attachment_index you typed is in the scope of Attachments which we set ")
 
 		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
-		glClearTexImage(m_ColorAttachmentIDs[attachmentIndex], 0, GL_RED_INTEGER, GL_INT, &value);
+		glClearTexImage(m_ColorAttachmentIDs[attachmentIndex], 0, 
+			Utils::HazelTexFormatToGL(spec), GL_INT, &value);
 	}
 
 

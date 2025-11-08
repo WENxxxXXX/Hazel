@@ -99,6 +99,11 @@ namespace Hazel
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
 			HZ_CORE_WARN("Pixel data: {0}", pixelData);
+
+			if (pixelData != -1 && m_HoveredEntity != Entity((entt::entity)pixelData, m_ActiveScene.get()))
+				m_HoveredEntity = Entity((entt::entity)pixelData, m_ActiveScene.get());
+			else if (pixelData == -1 && m_HoveredEntity != Entity())
+				m_HoveredEntity = Entity();
 		}
 
 		m_Framebuffer->Unbind();
@@ -213,8 +218,12 @@ namespace Hazel
 		ImGui::Text("Vertices: %d", stats.GetVertexCount());
 		ImGui::Text("Indices: %d", stats.GetIndexCount());
 
-		ImGui::End();
+		std::string name = "None";
+		if (m_HoveredEntity)
+			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hovered Entity: %s", name.c_str());
 
+		ImGui::End();
 		// ----------------- Viewport Image --------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");

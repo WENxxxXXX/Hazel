@@ -17,6 +17,9 @@ namespace Hazel {
 		glm::vec2 TexCoord;
 		float TexIndex;
 		float TilingFactor;
+
+		// Entity only
+		int EntityID;
 	};
 
 	struct Renderer2DData
@@ -67,7 +70,8 @@ namespace Hazel {
 			{ShaderDataType::Float4, "a_Color"},
 			{ShaderDataType::Float2, "a_TexCoord"},
 			{ShaderDataType::Float, "a_TexIndex"},
-			{ShaderDataType::Float, "a_TilingFactor"}
+			{ShaderDataType::Float, "a_TilingFactor"},
+			{ShaderDataType::Int, "a_EntityID"}
 		};
 		s_Data.QuadVB->SetLayout(squareLayout);
 
@@ -201,7 +205,8 @@ namespace Hazel {
 	}
 
 	// -------------------------- Draw func --------------------------------------
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, 
+		const int& entityID)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -223,6 +228,7 @@ namespace Hazel {
 			s_Data.QuadVBHind->TexCoord = texCoords[i];
 			s_Data.QuadVBHind->TexIndex = textureIndex;
 			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind->EntityID = entityID;
 			s_Data.QuadVBHind++;
 		}
 
@@ -249,7 +255,7 @@ namespace Hazel {
 
 	// -------------------------- Draw Texture --------------------------
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, 
-		float tilingFactor, const glm::vec4& tintColor)
+		float tilingFactor, const glm::vec4& tintColor, const int& entityID)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -290,6 +296,7 @@ namespace Hazel {
 			s_Data.QuadVBHind->TexCoord = texCoords[i];
 			s_Data.QuadVBHind->TexIndex = textureIndex;
 			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind->EntityID = entityID;
 			s_Data.QuadVBHind++;
 		}
 
@@ -317,7 +324,7 @@ namespace Hazel {
 
 	// -------------------------- Draw SubTexture
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subtexture,
-		float tilingFactor, const glm::vec4& tintColor)
+		float tilingFactor, const glm::vec4& tintColor, const int& entityID)
 	{
 		HZ_PROFILE_FUNCTION();
 
@@ -356,6 +363,7 @@ namespace Hazel {
 			s_Data.QuadVBHind->TexCoord = subTexCoords[i];
 			s_Data.QuadVBHind->TexIndex = textureIndex;
 			s_Data.QuadVBHind->TilingFactor = tilingFactor;
+			s_Data.QuadVBHind->EntityID = entityID;
 			s_Data.QuadVBHind++;
 		}
 
