@@ -27,6 +27,7 @@ IncludeDir["glm"] = "%{wks.location}/Hazel/vendor/glm"
 IncludeDir["stb_image"] = "%{wks.location}/Hazel/vendor/stb_image"
 IncludeDir["entt"] = "%{wks.location}/Hazel/vendor/Entt/include"
 IncludeDir["yaml_cpp"] = "%{wks.location}/Hazel/vendor/yaml-cpp/include"
+IncludeDir["ImGuizmo"] = "%{wks.location}/Hazel/vendor/ImGuizmo"
 
 ---------------------------------------------------------------------------------------
 --包含Nut/Nut/vendor/GLFW、Nut/Nut/vendor/Glad、Nut/Nut/vendor/imgui中的premake文件，将其作为依赖项，并合并到这里
