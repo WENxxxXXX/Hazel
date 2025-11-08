@@ -20,198 +20,23 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"--£¨·½±ãÊä³öºÍÖĞ¼
 -- °üº¬Ïà¶Ô¸ùÄ¿Â¼£¨½â¾ö·½°¸Ä¿Â¼£©µÄÄ¿Â¼
 -- ¶¨ÒåÈ«¾Ö±äÁ¿£¬·½±ãºóÃæÊ¹ÓÃ
 IncludeDir = {}--´´½¨Ò»¸öÃûÎªIncludeDirµÄ±í
-IncludeDir["GLFW"] = "Hazel/vendor/GLFW/include"--½«±íµÄ"GLFW"¼üË÷Òıµ½´ËÂ·¾¶
-IncludeDir["Glad"] = "Hazel/vendor/Glad/include"
-IncludeDir["Imgui"] = "Hazel/vendor/imgui"
-IncludeDir["glm"] = "Hazel/vendor/glm"
-IncludeDir["stb_image"] = "Hazel/vendor/stb_image"
-IncludeDir["entt"] = "Hazel/vendor/Entt/include"
+IncludeDir["GLFW"] = "%{wks.location}/Hazel/vendor/GLFW/include"--½«±íµÄ"GLFW"¼üË÷Òıµ½´ËÂ·¾¶
+IncludeDir["Glad"] = "%{wks.location}/Hazel/vendor/Glad/include"
+IncludeDir["Imgui"] = "%{wks.location}/Hazel/vendor/imgui"
+IncludeDir["glm"] = "%{wks.location}/Hazel/vendor/glm"
+IncludeDir["stb_image"] = "%{wks.location}/Hazel/vendor/stb_image"
+IncludeDir["entt"] = "%{wks.location}/Hazel/vendor/Entt/include"
+IncludeDir["yaml_cpp"] = "%{wks.location}/Hazel/vendor/yaml-cpp/include"
 
-include "Hazel/vendor/GLFW"-- ¼ìË÷Õâ¸öÄ¿Â¼ÏÂµÄluaÎÄ¼ş£¬¸ù¾İÕâĞ©luaÎÄ¼ş¹¹½¨ÏîÄ¿
-include "Hazel/vendor/Glad"
-include "Hazel/vendor/imgui"
+---------------------------------------------------------------------------------------
+--°üº¬Nut/Nut/vendor/GLFW¡¢Nut/Nut/vendor/Glad¡¢Nut/Nut/vendor/imguiÖĞµÄpremakeÎÄ¼ş£¬½«Æä×÷ÎªÒÀÀµÏî£¬²¢ºÏ²¢µ½ÕâÀï
+group "Dependencies"
+    include "Hazel/vendor/GLFW"-- ¼ìË÷Õâ¸öÄ¿Â¼ÏÂµÄluaÎÄ¼ş£¬¸ù¾İÕâĞ©luaÎÄ¼ş¹¹½¨ÏîÄ¿
+    include "Hazel/vendor/Glad"
+    include "Hazel/vendor/imgui"
+    include "Hazel/vendor/yaml-cpp"
+group "" 
 
-project "Hazel"
-    location "Hazel"        --ÏîÄ¿ÎÄ¼şµÄÊä³öÄ¿Â¼
-    --kind "SharedLib"        --ÀàĞÍ£¨¶¯Ì¬¿â£©
-    kind "StaticLib"        --ÀàĞÍ£¨¾²Ì¬¿â£©
-    language "C++"          --ÓïÑÔ
-    cppdialect "C++17"      --C++±ê×¼£¨±àÒëÊ±£©
-    staticruntime "on"
-
-    targetdir  ("bin/" .. outputdir .. "/%{prj.name}")      --Êä³öÄ¿Â¼(.. XX ..ÖĞ ".."ÊÇ×Ö·û´®Á¬½Ó·û)
-    objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")     --ÖĞ¼äÄ¿Â¼
-
-    pchheader "hzpch.h"     --Ô¤±àÒëÍ·ÎÄ¼ş
-    pchsource "Hazel/src/hzpch.cpp"--VSĞèÒªÕâ¸öÔ´ÎÄ¼ş
-
-    files       --½«Ô´´úÂëÎÄ¼şÌí¼Óµ½ÌØ¶¨µÄÏîÄ¿ÖĞ
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp",
-        "%{prj.name}/vendor/stb_image/**.h",
-        "%{prj.name}/vendor/stb_image/**.cpp",
-        "%{prj.name}/vendor/glm/glm/**.hpp",
-        "%{prj.name}/vendor/glm/glm/**.inl"
-    }
-
-    defines
-    {
-        "_CRT_SECURE_NO_WARNINGS",
-        "GLFW_INCLUDE_NONE"
-    }
-
-    includedirs --°üº¬Ä¿Â¼
-    {
-        "%{prj.name}/src",
-        "%{prj.name}/vendor/spdlog/include",
-        "%{IncludeDir.GLFW}", -- %{}Ê¹ÓÃÈ«¾Ö±äÁ¿
-        "%{IncludeDir.Glad}",
-        "%{IncludeDir.Imgui}",
-        "%{IncludeDir.glm}",
-        "%{IncludeDir.stb_image}",
-        "%{IncludeDir.entt}"
-    }
-
-    links       --ÎªÏîÄ¿(.dll)¸½¼ÓÒÀÀµÏî
-    {
-        "GLFW", --ÒÀÀµGLFWÏîÄ¿
-        "Glad",
-        "ImGui",
-        "opengl32.lib"
-    }
-
-    filter "system:windows"     --¹ıÂËÆ÷(Èç¹ûÏµÍ³ÊÇwindows)
-        systemversion "latest"  --windows SDK °æ±¾
-        defines                 --ºêµÄÉùÃ÷
-        {
-            --"HZ_PLATFORM_WINDOWS",
-            "HZ_BUILD_DLL"
-        }
-        outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}" 
-        postbuildcommands       --¹¹½¨ÏîÄ¿Íê³ÉºóÖ´ĞĞµÄÖ¸Áî
-        {
-            ("{MKDIR} ../bin/" .. outputdir .. "/Sandbox/"),
-            ("{COPYFILE} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox/%{cfg.buildtarget.name}")
-        }
-
-        buildoptions "/utf-8"
-
-    filter "configurations:Debug"
-        defines "HZ_DEBUG"
-        runtime "Debug"
-        symbols "on"
-
-    filter "configurations:Release"
-        defines "HZ_RELEASE"
-        runtime "Release"
-        optimize "on"
-
-    filter "configurations:Dist"
-        defines "HZ_DIST"
-        runtime "Release"
-        optimize "on"
-
-
-project "Sandbox"
-    location "Sandbox"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
-
-    targetdir  ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-    }
-    includedirs
-    {
-        "Hazel/vendor/spdlog/include",
-        "Hazel/src",
-        "%{IncludeDir.glm}",
-        "Hazel/vendor"
-    }
-
-    links
-    {
-        "Hazel"
-    }
-
-    filter "system:windows"
-        systemversion "latest"
-
-        defines
-        {
-            --"HZ_PLATFORM_WINDOWS"
-        }
-
-        buildoptions "/utf-8"
-    filter "configurations:Debug"
-        defines "HZ_DEBUG"
-        runtime "Debug"
-        symbols "on"
-    filter "configurations:Release"
-        defines "HZ_RELEASE"
-        runtime "Release"
-        optimize "on"
-    filter "configurations:Dist"
-        defines "HZ_DIST"
-        runtime "Release"
-        optimize "on"
-
-
-project "Hazelnut"
-    location "Hazelnut"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
-
-    targetdir  ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir  ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-    }
-    includedirs
-    {
-        "Hazel/vendor/spdlog/include",
-        "Hazel/src",
-        "%{IncludeDir.glm}",
-        "Hazel/vendor",
-        "%{IncludeDir.entt}"
-    }
-
-    links
-    {
-        "Hazel"
-    }
-
-    filter "system:windows"
-        systemversion "latest"
-
-        defines
-        {
-            --"HZ_PLATFORM_WINDOWS"
-        }
-
-        buildoptions "/utf-8"
-    filter "configurations:Debug"
-        defines "HZ_DEBUG"
-        runtime "Debug"
-        symbols "on"
-    filter "configurations:Release"
-        defines "HZ_RELEASE"
-        runtime "Release"
-        optimize "on"
-    filter "configurations:Dist"
-        defines "HZ_DIST"
-        runtime "Release"
-        optimize "on"
-
+include "Hazel"
+include "Sandbox"
+include "Hazelnut"
