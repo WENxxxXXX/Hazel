@@ -29,7 +29,9 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		m_Framebuffer = Hazel::FrameBuffer::Create({ 1280, 720 });
+		m_Framebuffer = Hazel::FrameBuffer::Create({ 1280, 720, 1, 
+			{FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::RGBA8, 
+			FrameBufferAttachmentFormat::Depth} });
 
 		m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
 		m_Emoji = Hazel::Texture2D::Create("assets/textures/emoji.png");
@@ -161,7 +163,7 @@ namespace Hazel
 				if (ImGui::MenuItem("Flag: PassthruCentralNode", "", (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode) != 0, opt_fullscreen)) { dockspace_flags ^= ImGuiDockNodeFlags_PassthruCentralNode; }*/
 				if (ImGui::MenuItem("New", "Ctrl + N"))
 					NewScene();
-				if (ImGui::MenuItem("Save As...", "Ctrl + S"))
+				if (ImGui::MenuItem("Save As...", "Ctrl + Shift + S"))
 					SaveSceneAs();
 				if (ImGui::MenuItem("Open...", "Ctrl + O"))
 					OpenScene();
@@ -203,7 +205,7 @@ namespace Hazel
 		ImVec2 panelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { panelSize.x, panelSize.y };
 
-		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID();
+		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID(1);
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 		// Gizmos

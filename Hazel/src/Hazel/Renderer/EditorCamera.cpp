@@ -72,7 +72,7 @@ namespace Hazel {
 			else if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_LEFT))
 				MouseRotate(delta);
 			else if (Input::IsMouseButtonPressed(HZ_MOUSE_BUTTON_RIGHT))
-				MouseZoom(delta.y);
+				MouseZoom(-delta.y);
 		}
 
 		UpdateView();
