@@ -30,7 +30,7 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		m_Framebuffer = Hazel::FrameBuffer::Create({ 1280, 720, 1, 
-			{FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::RGBA8, 
+			{FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::RED_INTEGER,
 			FrameBufferAttachmentFormat::Depth} });
 
 		m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
@@ -78,6 +78,24 @@ namespace Hazel
 		// Now we just update EditorCamera Hazelnut APP, rather than RuntimeCamera in game
 		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 		//m_ActiveScene->OnScript(ts);// 更新本机脚本
+
+
+		// Read Pixels from attachment
+		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+
+		auto [mX, mY] = ImGui::GetMousePos();
+		mX -= m_ViewportBounds[0].x;
+		mY -= m_ViewportBounds[0].y;
+		mY = viewportSize.y - mY;
+
+		int mouseX = (int)mX;
+		int mouseY = (int)mY;
+
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		{
+			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+			HZ_CORE_WARN("Pixel data: {0}", pixelData);
+		}
 
 		m_Framebuffer->Unbind();
 		
@@ -196,6 +214,7 @@ namespace Hazel
 		// ----------------- Viewport Image --------------------------
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 		ImGui::Begin("Viewport");
+		auto viewportOffset = ImGui::GetCursorPos();
 
 		// Viewport
 		m_ViewportFocused = ImGui::IsWindowFocused();
@@ -205,8 +224,18 @@ namespace Hazel
 		ImVec2 panelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { panelSize.x, panelSize.y };
 
-		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID(1);
+		ImTextureID textureID = (void*)m_Framebuffer->GetColorAttachmentRendererID(0);
 		ImGui::Image(textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
+
+		// Confirm boundary values
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		ImVec2 minBound = ImGui::GetWindowPos();
+		minBound.x += viewportOffset.x;
+		minBound.y += viewportOffset.y;
+		ImVec2 maxBound = { minBound.x + m_ViewportSize.x, minBound.y + m_ViewportSize.y };
+
+		m_ViewportBounds[0] = { minBound.x, minBound.y };
+		m_ViewportBounds[1] = { maxBound.x, maxBound.y };
 
 		// Gizmos
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
