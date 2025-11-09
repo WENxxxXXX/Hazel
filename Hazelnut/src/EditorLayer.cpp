@@ -79,10 +79,6 @@ namespace Hazel
 
 			m_EditorCamera.SetViewportSize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
-		// Camera Update
-		if (m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);
-		m_EditorCamera.OnUpdate(ts);
 
 		// Render
 		Renderer2D::ClearStats();// 每次更新前都要将Stats统计数据清零
@@ -93,11 +89,25 @@ namespace Hazel
 		// Clear entity ID to -1
 		m_Framebuffer->ClearAttachment(1, -1);
 
-		// Update scene
-		// Now we just update EditorCamera Hazelnut APP, rather than RuntimeCamera in game
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
-		//m_ActiveScene->OnScript(ts);// 更新本机脚本
+		switch (m_ToolbarPanel.GetSceneState())
+		{
+		case SceneState::Edit:
+		{
+			if (m_ViewportFocused)
+				m_CameraController.OnUpdate(ts);
 
+			m_EditorCamera.OnUpdate(ts);
+			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
+			//m_ActiveScene->OnScript(ts);// 更新本机脚本
+			break;
+
+		}
+		case SceneState::Play:
+		{
+			m_ActiveScene->OnUpdateRuntime(ts);
+			break;
+		}
+		}
 
 		// Read Pixels from attachment
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
@@ -222,9 +232,10 @@ namespace Hazel
 		}
 
 		// -- Should be writen in Dockspace( Between dockspace's ImGui::Begin() <-> ImGui::End() ) --
-		// ----------- Hierarchy Panel & Content Browser Panel ------------
+		// ----------- Hierarchy Panel & Content Browser Panel & Toolbar Panel ------------
 		m_SceneHierarchyPanel.OnImGuiRender();
 		m_ContentBrowserPanel.OnImGuiRender();
+		m_ToolbarPanel.OnImGuiRender();
 		// ----------- Test Panel---------------------------------------------
 		ImGui::Begin("Status");
 		auto stats = Renderer2D::GetStats();

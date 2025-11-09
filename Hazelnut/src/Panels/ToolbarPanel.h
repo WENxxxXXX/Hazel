@@ -1,0 +1,31 @@
+#pragma once
+
+#include "Hazel/Renderer/Texture.h"
+
+namespace Hazel
+{
+	enum class SceneState
+	{
+		Edit = 0, Play = 1
+	};
+
+
+	class ToolbarPanel
+	{
+	public:
+		ToolbarPanel();
+
+		void OnImGuiRender();
+
+		inline SceneState GetSceneState() const { return m_SceneState; }
+	private:
+		void OnScenePlay();
+		void OnSceneStop();
+	private:
+		SceneState m_SceneState = SceneState::Edit;
+
+		Ref<Texture2D> m_PlayIcon;
+		Ref<Texture2D> m_StopIcon;
+	};
+
+}
