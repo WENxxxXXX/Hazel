@@ -40,6 +40,19 @@ namespace Hazel
 
 		m_ActiveScene = CreateRef<Scene>();
 
+		auto commandLineArgs = Application::Get().GetCommandLineArgs();
+		if (commandLineArgs.Count > 1)
+		{
+			auto sceneFilePath = commandLineArgs[1];
+			SceneSerializer serializer(m_ActiveScene);
+			serializer.Deserialize(sceneFilePath);
+
+		}
+		auto sceneFilePath0 = commandLineArgs[0];
+
+		HZ_CORE_WARN(sceneFilePath0);
+
+
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}

@@ -13,7 +13,8 @@ namespace Hazel
 {
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const std::string& name /* = Hazel App */)
+	Application::Application(const std::string& name /* = Nut App */, ApplicationCommandLineArgs args /* = ApplicationCommandLineArgs()*/)
+		:m_CommandLineArgs(args)
 	{
 		HZ_PROFILE_FUNCTION();
 
