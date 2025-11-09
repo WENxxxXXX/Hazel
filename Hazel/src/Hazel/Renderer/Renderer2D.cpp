@@ -560,6 +560,16 @@ namespace Hazel {
 		DrawRotatedQuad(transform, rotation, subtexture, tilingFactor, tintColor);
 	}
 
+	// ------------------------------------- Draw Sprite -------------------------------------------------
+	void Renderer2D::DrawSprite(const glm::mat4& transform, const SpriteComponent& src, 
+		const int& entityID)
+	{
+		if (src.Texture)
+			DrawQuad(transform, src.Texture, src.TilingFactor, src.Color, entityID);
+		else
+			DrawQuad(transform, src.Color, entityID);
+	}
+
 	void Renderer2D::ClearStats()
 	{
 		//s_Data.Stats.DrawCalls = 0;

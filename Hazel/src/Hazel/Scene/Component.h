@@ -6,6 +6,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/quaternion.hpp"
 
+#include "Hazel/Renderer/Texture.h"
 #include "Hazel/Scene/SceneCamera.h"
 #include "Hazel/Scene/ScriptableEntity.h"
 
@@ -46,6 +47,8 @@ namespace Hazel
 	struct SpriteComponent
 	{
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		Ref<Texture2D> Texture;
+		float TilingFactor = 1.0f;
 
 		SpriteComponent() = default;
 		SpriteComponent(const glm::vec4& color)

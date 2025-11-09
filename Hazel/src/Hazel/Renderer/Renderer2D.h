@@ -7,6 +7,8 @@
 #include "Hazel/Renderer/Texture.h"
 #include "Hazel/Renderer/SubTexture2D.h"
 
+#include "Hazel/Scene/Component.h"
+
 namespace Hazel {
 
 	class Renderer2D
@@ -68,6 +70,9 @@ namespace Hazel {
 		static void DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, 
 			float rotation, const Ref<SubTexture2D>& texture, float tilingFactor = 1.0f, 
 			const glm::vec4& tintColor = glm::vec4(1.0f));
+
+		// 精灵 Sprite
+		static void DrawSprite(const glm::mat4& transform, const SpriteComponent& src, const int& entityID);
 
 
 		// Statistics (调试时使用的统计数据，存放在Statistics结构体)
