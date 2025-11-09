@@ -38,12 +38,13 @@ project "Hazel"--项目
         "vendor/spdlog/include",
         "%{IncludeDir.GLFW}",--将IncludeDir表中GLFW键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.Glad}",--将IncludeDir表中Glad键索引的值（地址）作为一个库文件路径
-        "%{IncludeDir.Imgui}",--将IncludeDir表中ImGui键索引的值（地址）作为一个库文件路径
+        "%{IncludeDir.ImGui}",--将IncludeDir表中ImGui键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.glm}",--将IncludeDir表中glm键索引的值（地址）作为一个库文件路径
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.entt}",
         "%{IncludeDir.yaml_cpp}",
-        "%{IncludeDir.ImGuizmo}"
+        "%{IncludeDir.ImGuizmo}",
+        "%{IncludeDir.VulkanSDK}"
     }
 
     links--为Hazel项目(.dll)链接文件
@@ -82,13 +83,34 @@ project "Hazel"--项目
         defines "HZ_DEBUG"
         runtime "Debug"
         symbols "on"--编译器是否生成带有调试符号的可执行文件
+        
+        links
+        {
+            "%{Library.ShaderC_Debug}",
+            "%{Library.SPIRV_Cross_Debug}",
+            "%{Library.SPIRV_Cross_GLSL_Debug}"
+        }
 
     filter "configurations:Release"
         defines "HZ_Release"
         runtime "Release"
         optimize "on"--是否开启代码优化
 
+        links
+        {
+            "%{Library.ShaderC_Release}",
+            "%{Library.SPIRV_Cross_Release}",
+            "%{Library.SPIRV_Cross_GLSL_Release}"
+        }
+
     filter "configurations:Dist"
         defines "HZ_DIST"
         runtime "Release"
         optimize "on"
+
+        links
+        {
+            "%{Library.ShaderC_Release}",
+            "%{Library.SPIRV_Cross_Release}",
+            "%{Library.SPIRV_Cross_GLSL_Release}"
+        }
