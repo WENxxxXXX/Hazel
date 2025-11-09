@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 
 	HZ_CORE_WARN("Command line args:");
 	for (int i = 0; i < argc; i++) {
-		HZ_CORE_TRACE("Argument {0}: {1}", i, argv[i]);
+		HZ_CORE_WARN("Argument {0}: {1}", i, argv[i]);
 	}
 
 	HZ_PROFILE_BEGIN_SESSION("Startup", "HazelProfile-Startup.json");

@@ -7,7 +7,6 @@
 #include "Hazel/Renderer/VertexArray.h"
 #include "Hazel/Renderer/RendererCommand.h"
 #include "Platform/OpenGL/OpenGLShader.h"
-#include "Hazel/Renderer/UniformBuffer.h"
 
 namespace Hazel {
 
@@ -55,14 +54,6 @@ namespace Hazel {
 		};
 
 		Renderer2D::Statistics Stats;
-
-		struct CameraData
-		{
-			glm::mat4 ViewProjection;
-		};
-		CameraData CameraBuffer;
-
-		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 	static Renderer2DData s_Data;//
 
@@ -118,7 +109,7 @@ namespace Hazel {
 		s_Data.TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");//根据glsl创建着色器对象
 		s_Data.TextureShader->Bind();//绑定着色器对象
 		//上传所有采样器到对应纹理单元
-		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);		
+		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
 		//Texture
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);//通过Create函数设置宽高比，根据包含颜色数据设置内存，直接从底层创建白色纹理
@@ -214,7 +205,7 @@ namespace Hazel {
 	}
 
 	// -------------------------- Draw func --------------------------------------
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, 
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color,
 		const int& entityID)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -263,7 +254,7 @@ namespace Hazel {
 
 
 	// -------------------------- Draw Texture --------------------------
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, 
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture,
 		float tilingFactor, const glm::vec4& tintColor, const int& entityID)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -314,13 +305,13 @@ namespace Hazel {
 		s_Data.Stats.QuadCount++;
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, 
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size,
 		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, texture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, 
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
 		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -382,15 +373,15 @@ namespace Hazel {
 	}
 
 
-	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, 
-		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, 
+	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size,
+		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/,
 		const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
 		DrawQuad({ position.x, position.y, 0.0f }, size, subtexture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, 
-		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/, 
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size,
+		const Ref<SubTexture2D>& subtexture, float tilingFactor /*= 1.0f*/,
 		const glm::vec4& tintColor /*= glm::vec4(1.0f)*/)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -428,7 +419,7 @@ namespace Hazel {
 
 		s_Data.Stats.QuadCount++;
 	}
-	
+
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, color);
@@ -446,7 +437,7 @@ namespace Hazel {
 	}
 
 	// ------------------------------------- Draw Rotated Texture
-	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation, 
+	void Renderer2D::DrawRotatedQuad(const glm::mat4& transform, float rotation,
 		const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
@@ -551,13 +542,13 @@ namespace Hazel {
 		s_Data.Stats.QuadCount++;
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, 
+	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size,
 		float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		DrawRotatedQuad({ position.x, position.y, 0.0f }, size, rotation, subtexture, tilingFactor, tintColor);
 	}
 
-	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size, 
+	void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const glm::vec2& size,
 		float rotation, const Ref<SubTexture2D>& subtexture, float tilingFactor, const glm::vec4& tintColor)
 	{
 		HZ_PROFILE_FUNCTION();
