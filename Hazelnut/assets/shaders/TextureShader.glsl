@@ -10,8 +10,10 @@ layout(location = 3) in float a_TexIndex;
 layout(location = 4) in float a_TilingFactor;
 layout(location = 5) in int a_EntityID;
 
-uniform mat4 u_ViewProjection;
-//uniform mat4 u_Transform;
+layout(std140, binding = 0) uniform Camera
+{
+	mat4 u_ViewProjection;
+};
 
 out vec4 v_Color;
 out vec2 v_TexCoord;
@@ -40,12 +42,8 @@ in vec2 v_TexCoord;
 in float v_TexIndex;
 in float v_TilingFactor;
 in flat int v_EntityID;
-// What's the different between 'in int v_EntityID;'and 'in flat int v_EntityID;'
 
 uniform sampler2D u_Textures[32];
-//uniform vec4 u_Color;
-//uniform sampler2D u_Texture;
-//uniform float u_TilingFactor;
 
 void main()
 {

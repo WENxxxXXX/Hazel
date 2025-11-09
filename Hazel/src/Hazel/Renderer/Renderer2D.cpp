@@ -7,6 +7,7 @@
 #include "Hazel/Renderer/VertexArray.h"
 #include "Hazel/Renderer/RendererCommand.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Hazel/Renderer/UniformBuffer.h"
 
 namespace Hazel {
 
@@ -54,6 +55,14 @@ namespace Hazel {
 		};
 
 		Renderer2D::Statistics Stats;
+
+		struct CameraData
+		{
+			glm::mat4 ViewProjection;
+		};
+		CameraData CameraBuffer;
+
+		Ref<UniformBuffer> CameraUniformBuffer;
 	};
 	static Renderer2DData s_Data;//
 
