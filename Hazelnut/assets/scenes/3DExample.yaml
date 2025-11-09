@@ -22,8 +22,8 @@ Entities:
     TagComponent:
       Tag: Left
     TransformComponent:
-      Translation: [-0.355, 0, 0.35]
-      Rotation: [0, -0.7853982, 0]
+      Translation: [-0.35496536, 0, 0.34996536]
+      Rotation: [0, -0.78539824, 0]
       Scale: [1, 1, 1]
     SpriteComponent:
       Color: [1, 0, 0.94980717, 1]
