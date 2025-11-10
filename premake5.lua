@@ -21,13 +21,14 @@ workspace "Hazel"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"--（方便输出和中间目录编写）
 
 ---------------------------------------------------------------------------------------
---包含Nut/Nut/vendor/GLFW、Nut/Nut/vendor/Glad、Nut/Nut/vendor/imgui中的premake文件，将其作为依赖项，并合并到这里
+--包含Hazel/Hazel/vendor/GLFW、Hazel/Hazel/vendor/Glad、Hazel/Hazel/vendor/imgui中的premake文件，将其作为依赖项，并合并到这里
 group "Dependencies"
     include "vendor/premake"
     include "Hazel/vendor/GLFW"-- 检索这个目录下的lua文件，根据这些lua文件构建项目
     include "Hazel/vendor/Glad"
     include "Hazel/vendor/imgui"
     include "Hazel/vendor/yaml-cpp"
+    include "Hazel/vendor/Box2D"
 group "" 
 
 include "Hazel"
