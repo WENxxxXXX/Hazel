@@ -53,7 +53,7 @@ namespace Hazel
 	void ToolbarPanel::OnSceneStop()
 	{
 		m_SceneState = SceneState::Edit;
-		EditorLayer::Get().m_ActiveScene->OnRuntimeStart();
+		EditorLayer::Get().m_ActiveScene->OnRuntimeStop();
 	}
 
 }
