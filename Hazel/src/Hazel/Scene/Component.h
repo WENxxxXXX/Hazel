@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Hazel/Core/UUID.h"
+
 #include "glm/glm.hpp"
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -12,6 +14,16 @@
 
 namespace Hazel
 {
+	struct IDComponent
+	{
+		UUID ID;
+
+		IDComponent() = default;
+		IDComponent(const UUID& id)
+			:ID(id) {
+		};
+		IDComponent(const IDComponent&) = default;
+	};
 
 	struct TagComponent
 	{

@@ -188,7 +188,7 @@ namespace Hazel
                 uint64_t uuid;
                 std::string name;
 
-                uuid = entity["Entity"].as<uint64_t>();// TODO
+                uuid = entity["Entity"].as<uint64_t>();
                 // Enter the TagComponent map, 
                 // and search for tag in submap(submap is stroed in TagComponent map)
                 auto tc = entity["TagComponent"];
@@ -196,7 +196,7 @@ namespace Hazel
                     name = tc["Tag"].as<std::string>();
 
                 HZ_CORE_TRACE("Deserialized entity with ID = {0}, name = {1}", uuid, name);
-                Entity& desirializedEntity = m_Scene->CreateEntity(name);       // Create a new entity in m_Scene with all defalur values
+                Entity& desirializedEntity = m_Scene->CreateEntityWithUUID(uuid, name);       // Create a new entity in m_Scene with all defalur values
 
                 DeserializeEntity(entity, desirializedEntity);                  // Update values in this entity accroding to yaml file
             }
@@ -216,8 +216,11 @@ namespace Hazel
     // ---------------------------------------------------------
     void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity& entity)
     {
+        HZ_CORE_ASSERT(entity.HasComponent<IDComponent>(), 
+            "Entity component do not have a universal uniform ID.");
+
         out << YAML::BeginMap; // Entity
-        out << YAML::Key << "Entity" << YAML::Value << "256257383941";          // TODO: Entity ID goes here
+        out << YAML::Key << "Entity" << YAML::Value << entity.GetComponent<IDComponent>().ID;
 
         if (entity.HasComponent<TagComponent>())
         {

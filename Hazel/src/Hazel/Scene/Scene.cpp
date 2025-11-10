@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "Scene.h"
 
+#include "Hazel/Scene/ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
 #include "Hazel/Scene/Component.h"
 #include "Hazel/Scene/Entity.h"
@@ -37,8 +38,14 @@ namespace Hazel
 
 	Entity Scene::CreateEntity(const std::string& name)
 	{
+		return CreateEntityWithUUID(UUID(), name);
+	}
+
+	Entity Scene::CreateEntityWithUUID(UUID uuid, const std::string& name)
+	{
 		Entity entity = { m_Registry.create(), this };
 
+		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TransformComponent>(glm::vec3{ 0.0f });
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Unnamed Entity" : name;
@@ -234,6 +241,11 @@ namespace Hazel
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{
 		static_assert(false);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component)
+	{
 	}
 
 	template<>

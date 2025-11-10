@@ -2,6 +2,7 @@
 
 #include "entt.hpp"
 #include "Hazel/Core/Timestep.h"
+#include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
 
 class b2World;//前向声明（针对Hazel作用域以外的外部库：Box2D）
@@ -17,6 +18,7 @@ namespace Hazel
 		~Scene();
 
 		Entity CreateEntity(const std::string& name = "");
+		Entity CreateEntityWithUUID(UUID id, const std::string& name = "");
 		void DestroyEntity(Entity& entity);
 
 		void OnRuntimeStart();
