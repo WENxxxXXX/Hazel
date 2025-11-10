@@ -4,6 +4,8 @@
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Renderer/EditorCamera.h"
 
+class b2World;//前向声明（针对Hazel作用域以外的外部库：Box2D）
+
 namespace Hazel
 {
 	class Entity;
@@ -17,6 +19,9 @@ namespace Hazel
 		Entity CreateEntity(const std::string& name = "");
 		void DestroyEntity(Entity& entity);
 
+		void OnRuntimeStart();
+		void OnRuntimeStop();
+
 		void OnUpdateRuntime(Timestep ts);
 		void OnUpdateEditor(Timestep ts, EditorCamera camera);
 		void OnScript(Timestep ts);
@@ -28,6 +33,7 @@ namespace Hazel
 		void OnComponentAdded(Entity entity, T& component);
 	private:
 		entt::registry m_Registry;
+		b2World* m_PhysicsWorld = nullptr;
 
 		uint32_t m_ViewportWidth, m_ViewportHeight;// We use it in Scene::OnComponentAdded<CameraComponent>
 

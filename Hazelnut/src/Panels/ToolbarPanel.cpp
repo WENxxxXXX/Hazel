@@ -1,6 +1,8 @@
 #include "hzpch.h"
 #include "ToolbarPanel.h"
 
+#include "../EditorLayer.h"
+
 #include <imgui/imgui.h>
 
 namespace Hazel
@@ -45,11 +47,13 @@ namespace Hazel
 	void ToolbarPanel::OnScenePlay()
 	{
 		m_SceneState = SceneState::Play;
+		EditorLayer::Get().m_ActiveScene->OnRuntimeStart();
 	}
 
 	void ToolbarPanel::OnSceneStop()
 	{
 		m_SceneState = SceneState::Edit;
+		EditorLayer::Get().m_ActiveScene->OnRuntimeStart();
 	}
 
 }

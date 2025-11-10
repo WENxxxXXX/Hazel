@@ -63,5 +63,7 @@ namespace Hazel
 
 		//Gizmo
 		int m_GizmoType = -1;
+	private:
+		friend class ToolbarPanel;
 	};
 }
