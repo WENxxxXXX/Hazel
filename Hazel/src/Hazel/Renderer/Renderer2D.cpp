@@ -22,6 +22,18 @@ namespace Hazel {
 		int EntityID;
 	};
 
+	struct CircleVertex
+	{
+		glm::vec3 WorldPosition;
+		glm::vec2 LocalPosition;
+		glm::vec4 Color;
+		float Thickness;
+		float Fade;
+
+		// Entity only
+		int EntityID;
+	};
+
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 1000;
@@ -33,11 +45,19 @@ namespace Hazel {
 		Ref<VertexArray> QuadVA;
 		Ref<VertexBuffer> QuadVB;
 		Ref<IndexBuffer> QuadIB;
-		Ref<Shader> TextureShader;
+		Ref<Shader> QuadShader;
 		Ref<Texture2D> WhiteTexture;
 
 		QuadVertex* QuadVBBase = nullptr;// 顶点指针起始
 		QuadVertex* QuadVBHind = nullptr;// 顶点指针末尾
+
+		Ref<VertexArray> CircleVA;
+		Ref<VertexBuffer> CircleVB;
+		Ref<Shader> CircleShader;
+
+		uint32_t CircleIndexCount = 0;
+		CircleVertex* CircleVBBase = nullptr;
+		CircleVertex* CircleVBHind = nullptr;
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> Textures;
 		uint32_t TextureSlotIndex = 1;
@@ -51,6 +71,14 @@ namespace Hazel {
 			{  0.5f, -0.5f, 0.0f, 1.0f },
 			{  0.5f,  0.5f, 0.0f, 1.0f },
 			{ -0.5f,  0.5f, 0.0f, 1.0f }
+		};
+
+		glm::vec4 CircleLocalPosition[4]
+		{
+			{ -1.0f, -1.0f, 0.0f, 1.0f },
+			{  1.0f, -1.0f, 0.0f, 1.0f },
+			{  1.0f,  1.0f, 0.0f, 1.0f },
+			{ -1.0f,  1.0f, 0.0f, 1.0f }
 		};
 
 		Renderer2D::Statistics Stats;
@@ -97,8 +125,26 @@ namespace Hazel {
 		s_Data.QuadVA->SetIndexBuffer(s_Data.QuadIB);
 		s_Data.QuadVA->AddVertexBuffer(s_Data.QuadVB);
 
+		// (... for circle)
+		s_Data.CircleVB = VertexBuffer::Create(s_Data.MaxVertices * sizeof(CircleVertex));
+		s_Data.CircleVB->SetLayout(
+			{
+			{ShaderDataType::Float3, "a_WorldPosition"},
+			{ShaderDataType::Float2, "a_LocalPosition"},
+			{ShaderDataType::Float4, "a_Color"		  },
+			{ShaderDataType::Float,  "a_Thickness"	  },
+			{ShaderDataType::Float,  "a_Fade"		  },
+			{ShaderDataType::Int,    "a_EntityID"	  }
+			}
+		);
+
+		s_Data.CircleVA = VertexArray::Create();
+		s_Data.CircleVA->SetIndexBuffer(s_Data.QuadIB);				// Tips:We do not create CircleIB for initialize CircleVA cuz we can use QuadIB and we can get the same effect
+		s_Data.CircleVA->AddVertexBuffer(s_Data.CircleVB);
+
 		// QuadVertex Ptr
 		s_Data.QuadVBBase = new QuadVertex[s_Data.MaxVertices];//保存指针初始位置
+		s_Data.CircleVBBase = new CircleVertex[s_Data.MaxVertices];
 
 		// Generate Samplers
 		int32_t samplers[s_Data.MaxTextureSlots];
@@ -106,10 +152,11 @@ namespace Hazel {
 			samplers[i] = i;
 
 		//shader
-		s_Data.TextureShader = Shader::Create("assets/shaders/TextureShader.glsl");//根据glsl创建着色器对象
-		s_Data.TextureShader->Bind();//绑定着色器对象
+		s_Data.CircleShader = Shader::Create("assets/shaders/Renderer2D_Circle.glsl");//根据glsl创建着色器对象
+		s_Data.QuadShader = Shader::Create("assets/shaders/Renderer2D_Quad.glsl");//根据glsl创建着色器对象
+		s_Data.QuadShader->Bind();//绑定着色器对象
 		//上传所有采样器到对应纹理单元
-		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
+		s_Data.QuadShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
 		//Texture
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);//通过Create函数设置宽高比，根据包含颜色数据设置内存，直接从底层创建白色纹理
@@ -123,6 +170,7 @@ namespace Hazel {
 		HZ_PROFILE_FUNCTION();
 
 		delete[] s_Data.QuadVBBase;
+		delete[] s_Data.CircleVBBase;
 	}
 
 	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& viewMatrix)
@@ -131,20 +179,27 @@ namespace Hazel {
 
 		glm::mat4 viewProjectionMatrix = camera.GetProjection() * glm::inverse(viewMatrix);
 
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+		s_Data.QuadShader->Bind();
+		s_Data.QuadShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+		s_Data.CircleShader->Bind();
+		s_Data.CircleShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
 		s_Data.QuadVBHind = s_Data.QuadVBBase;
+
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVBHind = s_Data.CircleVBBase;
 	}
 
 	void Renderer2D::BeginScene(const OrthoGraphicCamera& camera)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data.QuadShader->Bind();
+		s_Data.QuadShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+		s_Data.CircleShader->Bind();
+		s_Data.CircleShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
 
 		//每结束一次场景（依次场景中可能包含多个批渲染调用），需要绘制的索引数要从零重新开始
 		s_Data.QuadIndexCount = 0;
@@ -152,6 +207,9 @@ namespace Hazel {
 		s_Data.TextureSlotIndex = 1;
 		//每结束一次场景（依次场景中可能包含多个批渲染调用）,初始化后端指针 Hind 的位置（最初为零）
 		s_Data.QuadVBHind = s_Data.QuadVBBase;
+
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVBHind = s_Data.CircleVBBase;
 	}
 
 	void Renderer2D::BeginScene(const EditorCamera& camera)
@@ -160,22 +218,27 @@ namespace Hazel {
 
 		glm::mat4 viewProjectionMatrix = camera.GetViewProjection();
 
-		s_Data.TextureShader->Bind();
-		s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+		s_Data.QuadShader->Bind();
+		s_Data.QuadShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
+		s_Data.CircleShader->Bind();
+		s_Data.CircleShader->SetMat4("u_ViewProjection", viewProjectionMatrix);
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.TextureSlotIndex = 1;
 		s_Data.QuadVBHind = s_Data.QuadVBBase;
+
+		s_Data.CircleIndexCount = 0;
+		s_Data.CircleVBHind = s_Data.CircleVBBase;
 	}
 
 	void Renderer2D::EndScene()
 	{
 		HZ_PROFILE_FUNCTION();
 
-		// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
-		uint32_t dataSize = uint32_t((uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase);
-		// Reset VertexBuffer so flush Vertex data （because of Dynamic Draw)
-		s_Data.QuadVB->SetData(s_Data.QuadVBBase, dataSize);
+		//// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
+		//uint32_t dataSize = uint32_t((uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase);
+		//// Reset VertexBuffer so flush Vertex data （because of Dynamic Draw)
+		//s_Data.QuadVB->SetData(s_Data.QuadVBBase, dataSize);
 
 		Flush();// 更新数据之后绘制（刷新）
 	}
@@ -185,23 +248,47 @@ namespace Hazel {
 	{
 		EndScene();
 
-		s_Data.QuadIndexCount = 0;
-		s_Data.TextureSlotIndex = 1;
-		s_Data.QuadVBHind = s_Data.QuadVBBase;
+		//s_Data.QuadIndexCount = 0;
+		//s_Data.TextureSlotIndex = 1;
+		//s_Data.QuadVBHind = s_Data.QuadVBBase;
+		if (s_Data.QuadIndexCount)
+		{
+			s_Data.QuadIndexCount = 0;
+			s_Data.TextureSlotIndex = 1;
+			s_Data.QuadVBHind = s_Data.QuadVBBase;
+		}
+
+		if (s_Data.CircleIndexCount)
+		{
+			s_Data.CircleIndexCount = 0;
+			s_Data.CircleVBHind = s_Data.CircleVBBase;
+		}
 	}
 
 	void Renderer2D::Flush()
 	{
-		// 如果依次运行下来后发现没有需要绘制的图形，则返回空并跳出，不运行之后代码以节省性能
-		if (s_Data.QuadIndexCount == 0)
-			return;
+		if (s_Data.QuadIndexCount)// 如果依次运行下来后发现没有需要绘制的图形，则返回空并跳出，不运行之后代码以节省性能
+		{
+			uint32_t dataSize = uint32_t((uint8_t*)s_Data.QuadVBHind - (uint8_t*)s_Data.QuadVBBase);// Size 等于后端指针减去前端(hind 在绘制时一直更新数据）
+			s_Data.QuadVB->SetData(s_Data.QuadVBBase, dataSize);// Reset VertexBuffer so flush Vertex data （because of Dynamic Draw)
 
-		// Bind texture before rendering
-		for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
-			// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
-			s_Data.Textures[i]->Bind(i);
-		RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);// 运行至此处时进行渲染
-		s_Data.Stats.DrawCalls++;
+			// Bind texture before rendering
+			for (uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
+				s_Data.Textures[i]->Bind(i);// 对数组使用"->"才是对其中对象进行操作，'.'是对数组进行操作。
+			s_Data.QuadShader->Bind();
+			RendererCommand::DrawIndexed(s_Data.QuadVA, s_Data.QuadIndexCount);						// 运行至此处时进行渲染
+			s_Data.Stats.DrawCalls++;
+		}
+
+		if (s_Data.CircleIndexCount)
+		{
+			uint32_t dataSize = uint32_t((uint8_t*)s_Data.CircleVBHind - (uint8_t*)s_Data.CircleVBBase);
+			s_Data.CircleVB->SetData(s_Data.CircleVBBase, dataSize);
+
+			s_Data.CircleShader->Bind();
+			RendererCommand::DrawIndexed(s_Data.CircleVA, s_Data.CircleIndexCount);
+			s_Data.Stats.DrawCalls++;
+		}
 	}
 
 	// -------------------------- Draw func --------------------------------------
@@ -234,7 +321,7 @@ namespace Hazel {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color)
@@ -302,7 +389,7 @@ namespace Hazel {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size,
@@ -369,7 +456,7 @@ namespace Hazel {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 
@@ -417,7 +504,7 @@ namespace Hazel {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const glm::vec4& color)
@@ -477,7 +564,7 @@ namespace Hazel {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size, float rotation, const Ref<Texture2D>& texture, float tilingFactor, const glm::vec4& tintColor)
@@ -539,7 +626,7 @@ namespace Hazel {
 
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount++;
+		s_Data.Stats.GraphicCount++;
 	}
 
 	void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const glm::vec2& size,
@@ -560,8 +647,37 @@ namespace Hazel {
 		DrawRotatedQuad(transform, rotation, subtexture, tilingFactor, tintColor);
 	}
 
+
+	void Renderer2D::DrawCircle(const glm::mat4& transform, const glm::vec4& color, 
+		float thickness /*=1.0f*/, float fade /*=0.005f*/, const int& entityID /*= -1*/)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		if (s_Data.CircleIndexCount >= s_Data.MaxIndices)
+		{
+			FlushAndReset();
+		}
+
+		constexpr size_t circleVertexCount = 4;
+
+		for (size_t i = 0; i < circleVertexCount; i++)
+		{
+			s_Data.CircleVBHind->WorldPosition = transform * s_Data.QuadVertexPosition[i];
+			s_Data.CircleVBHind->LocalPosition = s_Data.CircleLocalPosition[i];
+			s_Data.CircleVBHind->Color = color;
+			s_Data.CircleVBHind->Thickness = thickness;
+			s_Data.CircleVBHind->Fade = fade;
+			s_Data.CircleVBHind->EntityID = entityID;
+			s_Data.CircleVBHind++;
+		}
+
+		s_Data.CircleIndexCount += 6;
+
+		s_Data.Stats.GraphicCount++;
+	}
+
 	// ------------------------------------- Draw Sprite -------------------------------------------------
-	void Renderer2D::DrawSprite(const glm::mat4& transform, const SpriteComponent& src, 
+	void Renderer2D::DrawQuadSprite(const glm::mat4& transform, const SpriteComponent& src,
 		const int& entityID)
 	{
 		if (src.Texture)
@@ -570,10 +686,16 @@ namespace Hazel {
 			DrawQuad(transform, src.Color, entityID);
 	}
 
+	void Renderer2D::DrawCircleSprite(const glm::mat4& transform, const CircleComponent& src, 
+		const int& entityID)
+	{
+		DrawCircle(transform, src.Color, src.Thickness, src.Fade, entityID);
+	}
+
 	void Renderer2D::ClearStats()
 	{
 		//s_Data.Stats.DrawCalls = 0;
-		//s_Data.Stats.QuadCount = 0;
+		//s_Data.Stats.GraphicCount  = 0;
 		memset(&s_Data.Stats, 0, sizeof(Statistics));
 	}
 

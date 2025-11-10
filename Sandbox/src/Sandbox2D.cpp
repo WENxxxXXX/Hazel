@@ -152,7 +152,7 @@ void Sandbox2D::OnImGuiRender()
 	auto stats = Hazel::Renderer2D::GetStats();
 	ImGui::Text("Renderer2D Stats:");
 	ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-	ImGui::Text("Quads: %d", stats.QuadCount);
+	ImGui::Text("Quads: %d", stats.GraphicCount);
 	ImGui::Text("Vertices: %d", stats.GetVertexCount());
 	ImGui::Text("Indices: %d", stats.GetIndexCount());
 

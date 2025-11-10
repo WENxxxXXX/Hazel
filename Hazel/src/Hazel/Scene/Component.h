@@ -72,6 +72,19 @@ namespace Hazel
 		operator const glm::vec4& () const { return Color; }
 	};
 
+	struct CircleComponent
+	{
+		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		float Thickness = 1.0f;
+		float Fade = 0.005f;
+
+		CircleComponent() = default;
+		CircleComponent(const glm::vec4& color)
+			:Color(color) {
+		};
+		CircleComponent(const CircleComponent&) = default;
+	};
+
 	struct CameraComponent
 	{
 		SceneCamera Camera;
