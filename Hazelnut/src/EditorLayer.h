@@ -28,6 +28,8 @@ namespace Hazel
 		bool OnKeyPressed(KeyPressedEvent& event);
 		bool OnMouseButtonPressed(MouseButtonPressedEvent& event);
 
+		void OnDuplicateEntity();
+
 		glm::vec2 GetImGuiViewportSize() { return m_ViewportSize; };
 
 		void NewScene();
@@ -44,8 +46,8 @@ namespace Hazel
 		Hazel::Ref<Hazel::FrameBuffer> m_Framebuffer;
 
 		Ref<Scene> m_ActiveScene;
+		Ref<Scene> m_EditorScene;
 		Entity m_SquareEntity, m_RedSquare, m_HoveredEntity, m_UsingEntity;
-		Entity m_CameraEntity, m_SecondCamera; 
 
 		bool m_ViewportFocused = false, m_ViewportHovered = false;
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };

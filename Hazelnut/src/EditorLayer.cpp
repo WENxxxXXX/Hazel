@@ -56,7 +56,7 @@ namespace Hazel
 
 
 		m_EditorCamera = EditorCamera(30.0f, 1.778f, 0.1f, 1000.0f);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		//m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OnDetach()
@@ -400,6 +400,15 @@ namespace Hazel
 			break;
 		}
 
+		// Scene Commands
+		case HZ_KEY_D:
+		{
+			if (ctrl)
+				OnDuplicateEntity();
+
+			break;
+		}
+
 		// Gizmo
 		case HZ_KEY_Q:
 		{
@@ -438,6 +447,16 @@ namespace Hazel
 		return false;
 	}
 
+	void EditorLayer::OnDuplicateEntity()
+	{
+		if (m_ToolbarPanel.GetSceneState() != SceneState::Edit)
+			return;
+
+		auto selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+		if (selectedEntity)
+			m_ActiveScene->DuplicateEntity(selectedEntity);
+	}
+
 	void EditorLayer::NewScene()
 	{
 		m_ActiveScene = CreateRef<Scene>();
@@ -460,12 +479,16 @@ namespace Hazel
 			m_ToolbarPanel.SetSceneState(SceneState::Edit);
 		m_ActiveScene->OnRuntimeStop();
 
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+		Ref<Scene> newScene = CreateRef<Scene>();
+		SceneSerializer serializer(newScene);
+		if (serializer.Deserialize(path.string()))
+		{
+			m_EditorScene = newScene;
+			m_EditorScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);// We use it cuz we must flash framebuffer after we open file
 
-		SceneSerializer serializer(m_ActiveScene);
-		serializer.Deserialize(path.string());
+			m_ActiveScene = m_EditorScene;
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);										// We use it cuz we need to flash the data / result which is rendered in hierarchy panel
+		}
 	}
 
 	void EditorLayer::SaveSceneAs()

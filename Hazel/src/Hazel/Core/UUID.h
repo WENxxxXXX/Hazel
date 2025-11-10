@@ -19,3 +19,16 @@ namespace Hazel
 	};
 
 }
+
+namespace std
+{
+	// // 为 UUID 类型定义哈希函数（确保 UUID 可以被哈希处理）
+	template<>
+	struct hash<Hazel::UUID>
+	{
+		std::size_t operator()(const Hazel::UUID& uuid) const
+		{
+			return hash<uint64_t>()((uint64_t)uuid);
+		}
+	};
+}

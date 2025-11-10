@@ -30,27 +30,25 @@ namespace Hazel
 	{
 		ImGui::Begin("Scene Hierarchy");
 
-		m_Context->m_Registry.view<entt::entity>().each(
-			[&](auto entityID)
+		if (m_Context) {
+			m_Context->m_Registry.view<entt::entity>().each(
+				[&](auto entityID)
+				{
+					Entity entity{ entityID, m_Context.get() };			// So we can use member function from class Entity
+					DrawEntityNode(entity);
+				}
+			);
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())		// When mouse left was pressed and mouse position was in SceneHierarchy Panel, then...
+				m_SelectionContext = {};
+
+			// Right-click on blank space of the window
+			if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))	// Disable 'ContextWindow' from covering previous 'ContextItem Menu'(Which was in SceneHierarchyPanel::DrawEntityNode)
 			{
-				// So we can use member function from class Entity
-				Entity entity{ entityID, m_Context.get() };
-				DrawEntityNode(entity);
+				if (ImGui::MenuItem("Create Empty Entity"))
+					m_Context->CreateEntity("Empty Entity");
+				ImGui::EndPopup();
 			}
-		);
-
-		// When mouse left was pressed and mouse position was in SceneHierarchy Panel, then...
-		if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-			m_SelectionContext = {};
-
-		// Right-click on blank space of the window
-		if (ImGui::BeginPopupContextWindow(0, 1 | ImGuiPopupFlags_NoOpenOverItems))	// Disable 'ContextWindow' from covering previous 'ContextItem Menu'(Which was in SceneHierarchyPanel::DrawEntityNode)
-		{
-			if (ImGui::MenuItem("Create Empty Entity"))
-				m_Context->CreateEntity("Empty Entity");
-			ImGui::EndPopup();
 		}
-
 		ImGui::End();
 
 		ImGui::Begin("Properties");
