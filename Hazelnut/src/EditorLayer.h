@@ -35,6 +35,7 @@ namespace Hazel
 		void NewScene();
 		void OpenScene();
 		void OpenScene(const std::filesystem::path& path);
+		void SaveScene();
 		void SaveSceneAs();
 	private:
 		// Instance 
@@ -65,6 +66,9 @@ namespace Hazel
 
 		//Gizmo
 		int m_GizmoType = -1;
+
+		// Path
+		std::filesystem::path m_ActiveScenePath;
 	private:
 		friend class ToolbarPanel;
 	};

@@ -42,6 +42,12 @@ namespace Hazel
 		ImGui::PopStyleVar(2);
 		ImGui::PopStyleColor(3);
 		ImGui::End();
+
+		if (m_ShowPop)
+		{
+			ImGui::OpenPopup("Info Popup");
+			ImGuiInfoWindow("Please load scene first!");
+		}
 	}
 
 	void ToolbarPanel::OnScenePlay()
@@ -51,12 +57,20 @@ namespace Hazel
 		Ref<Scene>& editorScene = EditorLayer::Get().m_EditorScene;
 		SceneHierarchyPanel& sceneHierarchyPanel = EditorLayer::Get().m_SceneHierarchyPanel;
 
-		m_SceneState = SceneState::Play;
+		if (editorScene != nullptr)
+		{
+			m_SceneState = SceneState::Play;
 
-		activeScene = Scene::Copy(editorScene);// When playing, active scene is the duplicate of editor scene
+			activeScene = Scene::Copy(editorScene);// When playing, active scene is the duplicate of editor scene
 
-		activeScene->OnRuntimeStart();
-		sceneHierarchyPanel.SetContext(activeScene);
+			activeScene->OnRuntimeStart();
+			sceneHierarchyPanel.SetContext(activeScene);
+		}
+		else
+		{
+			HZ_CORE_CRIRICAL("There is no active scene to used(should load scene first)!");
+			m_ShowPop = true;
+		}		
 	}
 
 	void ToolbarPanel::OnSceneStop()
@@ -73,4 +87,28 @@ namespace Hazel
 		sceneHierarchyPanel.SetContext(activeScene);
 	}
 
+	void ToolbarPanel::ImGuiInfoWindow(const std::string& text)
+	{
+		if (ImGui::BeginPopupModal("Info Popup", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize))
+		{
+			ImGui::Text(text.c_str());
+			ImGui::Separator();
+
+			// 设置光标位置使按钮居中
+			float buttonWidth = ImGui::CalcTextSize("OK").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+			float windowWidth = ImGui::GetWindowSize().x;
+			float centerX = (windowWidth - buttonWidth) * 0.5f;
+
+			ImGui::SetCursorPosX(centerX);
+
+			// 添加一个确认按钮
+			if (ImGui::Button("OK"))
+			{
+				ImGui::CloseCurrentPopup();
+				m_ShowPop = false;
+			}
+
+			ImGui::EndPopup();
+		}
+	}
 }
