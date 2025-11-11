@@ -1,0 +1,117 @@
+Scene: Untitled
+Entities:
+  - Entity: 9322571375263289016
+    TagComponent:
+      Tag: red circle
+    TransformComponent:
+      Translation: [0.65656805, 13.341825, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CircleComponent:
+      Color: [1, 0, 0, 1]
+      Thickness: 1
+      Fade: 0.005
+    Rigidbody2DComponent:
+      BodyType: Dynamic
+      FixedRotation: false
+    CircleCollider2DComponent:
+      Offset: [0, 0]
+      Radius: 0.5
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+  - Entity: 10800249492629730049
+    TagComponent:
+      Tag: camera
+    TransformComponent:
+      Translation: [4.7054644, 3.7881134, 16.8]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 1.0471976
+        PerspectiveNear: 0.01
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+      FixedAspectRatio: false
+  - Entity: 6958073775201139256
+    TagComponent:
+      Tag: ground1
+    TransformComponent:
+      Translation: [-2.3557918, 4.8866177, -0.23622696]
+      Rotation: [0.00034434584, 0.060947653, -0.7853982]
+      Scale: [16.35338, 0.9999999, 1]
+    SpriteComponent:
+      Color: [0.052075997, 0, 0.9145907, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.3
+      RestitutionThreshold: 0.5
+  - Entity: 8911692003211906132
+    TagComponent:
+      Tag: ground2
+    TransformComponent:
+      Translation: [8.653437, 0.9854375, 0.18416928]
+      Rotation: [-0.079366244, -0.0060313833, 0.7853983]
+      Scale: [12.294783, 0.9999999, 1]
+    SpriteComponent:
+      Color: [0.052075997, 0, 0.9145907, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.2
+      RestitutionThreshold: 0.5
+  - Entity: 15736375473348692610
+    TagComponent:
+      Tag: ground1
+    TransformComponent:
+      Translation: [-2.5790954, 10.549446, 0.0012315334]
+      Rotation: [0.0003443533, 0.060947668, -0.7853982]
+      Scale: [16.35338, 0.99999994, 1]
+    SpriteComponent:
+      Color: [0.052075997, 0, 0.9145907, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.3
+      RestitutionThreshold: 0.5
+  - Entity: 15882227600723299798
+    TagComponent:
+      Tag: ground2
+    TransformComponent:
+      Translation: [8.519682, 6.313115, -0.11447923]
+      Rotation: [-0.077769205, -0.007995977, 0.7853982]
+      Scale: [12.294788, 0.9999999, 0.99999976]
+    SpriteComponent:
+      Color: [0.052075997, 0, 0.9145907, 1]
+    Rigidbody2DComponent:
+      BodyType: Static
+      FixedRotation: false
+    BoxCollider2DComponent:
+      Offset: [0, 0]
+      Size: [0.5, 0.5]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0.3
+      RestitutionThreshold: 0.5

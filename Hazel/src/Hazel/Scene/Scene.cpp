@@ -11,6 +11,7 @@
 #include "box2d/b2_world.h"
 #include "box2d/b2_body.h"
 #include "box2d/b2_polygon_shape.h"
+#include "box2d/b2_circle_shape.h"
 #include "box2d/b2_fixture.h"
 
 namespace Hazel
@@ -93,6 +94,7 @@ namespace Hazel
 		CopyComponentForNewScene<NativeScriptComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<Rigidbody2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
 		CopyComponentForNewScene<BoxCollider2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
+		CopyComponentForNewScene<CircleCollider2DComponent>(dstRegistry, srcRegistry, dstEntityMap);
 
 		return newScene;
 	}
@@ -109,6 +111,7 @@ namespace Hazel
 		CopyComponentIfExists<NativeScriptComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, srcEntity);
 		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, srcEntity);
+		CopyComponentIfExists<CircleCollider2DComponent>(newEntity, srcEntity);
 
 	}
 
@@ -168,6 +171,24 @@ namespace Hazel
 				fixtureDef.friction = bc2c.Friction;
 				fixtureDef.restitution = bc2c.Restitution;
 				fixtureDef.restitutionThreshold = bc2c.RestitutionThreshold;
+
+				body->CreateFixture(&fixtureDef);
+			}
+
+			if (entity.HasComponent<CircleCollider2DComponent>())
+			{
+				auto& cc2c = entity.GetComponent<CircleCollider2DComponent>();
+
+				b2CircleShape circleShape;
+				circleShape.m_p.Set(cc2c.Offset.x, cc2c.Offset.y);
+				circleShape.m_radius = cc2c.Radius;
+
+				b2FixtureDef fixtureDef;
+				fixtureDef.shape = &circleShape;
+				fixtureDef.density = cc2c.Density;
+				fixtureDef.friction = cc2c.Friction;
+				fixtureDef.restitution = cc2c.Restitution;
+				fixtureDef.restitutionThreshold = cc2c.RestitutionThreshold;
 
 				body->CreateFixture(&fixtureDef);
 			}
@@ -389,6 +410,11 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
 	{
 	}
 }

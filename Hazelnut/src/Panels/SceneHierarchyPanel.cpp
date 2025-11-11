@@ -173,6 +173,16 @@ namespace Hazel
 							ImGui::CloseCurrentPopup();
 						}
 					}
+
+					if (!entity.HasComponent<CircleCollider2DComponent>())
+					{
+						if (ImGui::MenuItem("CircleCollider2DComponent"))
+						{
+							m_SelectionContext.AddComponent<CircleCollider2DComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
 					ImGui::EndPopup();
 				}
 			}
@@ -314,6 +324,16 @@ namespace Hazel
 			{
 				ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
 				ImGui::DragFloat2("Size", glm::value_ptr(component.Offset));
+				ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+				ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
+			});
+
+		DrawComponent<CircleCollider2DComponent>("CircleCollider2D", entity, [](auto& component)
+			{
+				ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
+				ImGui::DragFloat("Radius", &component.Radius, 0.2f, 0.0f, 10.0f);
 				ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
 				ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
 				ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
