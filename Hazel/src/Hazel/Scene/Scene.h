@@ -4,6 +4,7 @@
 #include "Hazel/Core/Timestep.h"
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
+#include <Hazel/Renderer/Model.h>
 
 class b2World;//前向声明（针对Hazel作用域以外的外部库：Box2D）
 

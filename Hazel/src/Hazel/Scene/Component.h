@@ -171,4 +171,33 @@ namespace Hazel
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
 	};
 
+
+	// ----------------------- 3D Render --------------------------------------
+	struct MeshComponent
+	{
+		Ref<Model> model;
+		std::string filePath;
+
+		MeshComponent() = default;
+		MeshComponent(const MeshComponent&) = default;
+	};
+
+	enum class ShaderType
+	{
+		BlinnPhong,
+		Transparent,
+		PBR
+	};
+	struct MaterialComponent
+	{
+		ShaderType shaderType = ShaderType::BlinnPhong;
+
+		glm::vec3 ambient = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 diffuse = { 1.0f, 1.0f, 1.0f };
+		glm::vec3 specular = { 1.0f, 1.0f, 1.0f };
+		float shininess = 32.0f;
+
+		MaterialComponent() = default;
+		MaterialComponent(const MaterialComponent&) = default;
+	};
 }

@@ -45,6 +45,7 @@ project "Hazel"--项目
         "%{IncludeDir.yaml_cpp}",
         "%{IncludeDir.ImGuizmo}",
         "%{IncludeDir.Box2D}",
+        "%{IncludeDir.assimp}",
         "%{IncludeDir.VulkanSDK}"
     }
 
@@ -55,7 +56,8 @@ project "Hazel"--项目
         "ImGui",--链接上方group中的项目ImGui
         "yaml-cpp",--链接根目录premake文件里group中的项目yaml-cpp
         "Box2D",
-        "opengl32.lib"
+        "opengl32.lib",
+        "%{LibraryDir.assimp}/assimp-vc143-mtd.lib"
     }
     
     filter "files:vendor/ImGuizmo/**.cpp"                       --?? why

@@ -1,6 +1,6 @@
 ------------------------- Hazel Dependencies --------------------------
 
-VULKAN_SDK = os.getenv("VULKAN_SDK") -- os.getenv("VULKAN_SDK") ÓÃÀ´»ñÈ¡»·¾³±äÁ¿ VULKAN_SDK µÄÖµ£¬Í¨³£ÊÇ´æ´¢ Vulkan SDK£¨Èí¼þ¿ª·¢¹¤¾ß°ü£©µÄ°²×°Â·¾¶
+VULKAN_SDK = os.getenv("VULKAN_SDK") -- os.getenv("VULKAN_SDK") ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ VULKAN_SDK ï¿½ï¿½Öµï¿½ï¿½Í¨ï¿½ï¿½ï¿½Ç´æ´¢ Vulkan SDKï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß°ï¿½ï¿½ï¿½ï¿½Ä°ï¿½×°Â·ï¿½ï¿½
 
 IncludeDir = {}
 IncludeDir["stb_image"] = "%{wks.location}/Hazel/vendor/stb_image"
@@ -15,16 +15,18 @@ IncludeDir["shaderc"] = "%{wks.location}/Hazel/vendor/VulkanSDK/Include/shaderc"
 IncludeDir["SPIRV_Cross"] = "%{wks.location}/Hazel/vendor/VulkanSDK/Include/spirv_cross"
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 IncludeDir["Box2D"] = "%{wks.location}/Hazel/vendor/Box2D/include"
+IncludeDir["assimp"] = "%{wks.location}/Hazel/vendor/assimp"
 
 LibraryDir = {}
 
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_Debug"] = "%{VULKAN_SDK}/Lib"
+LibraryDir["assimp"] = "%{IncludeDir.assimp}/Lib"
 
 Library = {}
 
 Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
-Library["VulkaHazelils"] = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"    --ÎÄ¼þ²»´æÔÚ
+Library["VulkaHazelils"] = "%{LibraryDir.VulkanSDK}/VkLayer_utils.lib"    --ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 Library["ShaderC_Debug"] = "%{LibraryDir.VulkanSDK_Debug}/shaderc_shared.lib"
 Library["SPIRV_Cross_Debug"] = "%{LibraryDir.VulkanSDK_Debug}/spirv-cross-core.lib"

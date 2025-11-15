@@ -1,6 +1,7 @@
 #include "hzpch.h"
 #include "Hazel/Renderer/Renderer.h"
 #include "Hazel/Renderer/Renderer2D.h"
+#include "Hazel/Renderer/Renderer3D.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -14,6 +15,7 @@ namespace Hazel
 
 		RendererCommand::Init();
 		Renderer2D::Init();
+		Renderer3D::Init();
 	}	
 	
 	void Renderer::Shutdown()

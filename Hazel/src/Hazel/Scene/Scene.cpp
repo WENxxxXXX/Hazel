@@ -3,6 +3,7 @@
 
 #include "Hazel/Scene/ScriptableEntity.h"
 #include "Hazel/Renderer/Renderer2D.h"
+#include "Hazel/Renderer/Renderer3D.h"
 #include "Hazel/Scene/Component.h"
 #include "Hazel/Scene/Entity.h"
 
@@ -30,7 +31,7 @@ namespace Hazel
 
 	Scene::Scene()
 	{
-
+		
 	}
 
 	Scene::~Scene()
@@ -298,6 +299,24 @@ namespace Hazel
 		}
 
 		Renderer2D::EndScene();
+
+
+		Renderer3D::BeginScene(camera);
+		{
+			auto& view = m_Registry.view<TransformComponent, MeshComponent, MaterialComponent>();
+			for (auto entity : view)
+			{
+				auto [transform, mesh, material] = view.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
+				if (mesh.model)
+				{
+					Renderer3D::DrawIndexed(material, transform.GetTransform(),
+						mesh.model->GetVertexArray(), mesh.model->GetIndexBuffer()->GetCount(), (int)entity);
+				}
+			}
+		}
+		//Renderer3D::EndScene();
+
+
 	}
 
 	void Scene::OnScript(Timestep ts)
@@ -415,6 +434,16 @@ namespace Hazel
 
 	template<>
 	void Scene::OnComponentAdded<CircleCollider2DComponent>(Entity entity, CircleCollider2DComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
+	{
+	}
+
+	template<>
+	void Scene::OnComponentAdded<MaterialComponent>(Entity entity, MaterialComponent& component)
 	{
 	}
 }

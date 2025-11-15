@@ -183,6 +183,24 @@ namespace Hazel
 						}
 					}
 
+					if (!entity.HasComponent<MeshComponent>())
+					{
+						if (ImGui::MenuItem("MeshComponent"))
+						{
+							m_SelectionContext.AddComponent<MeshComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
+					if (!entity.HasComponent<MaterialComponent>())
+					{
+						if (ImGui::MenuItem("MaterialComponent"))
+						{
+							m_SelectionContext.AddComponent<MaterialComponent>();
+							ImGui::CloseCurrentPopup();
+						}
+					}
+
 					ImGui::EndPopup();
 				}
 			}
@@ -338,6 +356,56 @@ namespace Hazel
 				ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
 				ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
 				ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
+			});
+
+		DrawComponent<MeshComponent>("Mesh", entity, [](auto& component)
+			{
+				// DragDropPayload
+				ImGui::Button("..Mesh File..", ImVec2(100.0f, 50.0f));
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+					{
+						const wchar_t* path = (const wchar_t*)payload->Data;
+						std::filesystem::path meshPath = std::filesystem::path(g_AssetPath) / path;
+						component.filePath = meshPath.string();
+						component.model = CreateRef<Model>(meshPath.string());
+					}
+					ImGui::EndDragDropTarget();
+				}
+			});
+
+		DrawComponent<MaterialComponent>("Material", entity, [](auto& component)
+			{
+				// --------- Draw Combo Box --------
+				const char* shaderNames[] = { "BlinnPhong", "Transparent", "PBR" };
+				const char* currentshaderName = shaderNames[(int)component.shaderType];
+				if (ImGui::BeginCombo("Shader", currentshaderName))			// Combo box preview value needs to be a c_str
+				{
+					// -------- Draw drop-down Selection List --------
+					for (int i = 0; i < 3; i++)
+					{
+						bool isSelected = (shaderNames[i] == currentshaderName);
+						if (ImGui::Selectable(shaderNames[i], isSelected))		// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
+						{
+							currentshaderName = shaderNames[i];				// If you select one projection, then update current projection type string as latest
+							component.shaderType = ShaderType(i);
+						}
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();	// 用于更新焦点（焦点不同于高亮显示）
+					}
+					ImGui::EndCombo();
+				}
+
+				if (currentshaderName == "BlinnPhong")
+				{
+					ImGui::ColorEdit3("ambient", glm::value_ptr(component.ambient));
+					ImGui::ColorEdit3("diffuse", glm::value_ptr(component.diffuse));
+					ImGui::ColorEdit3("specular", glm::value_ptr(component.specular));
+
+					ImGui::DragFloat("shininess", &component.shininess, 5.0f, 1.0f, 1024.0f);
+				}
 			});
 	}
 
