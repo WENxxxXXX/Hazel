@@ -13,6 +13,8 @@
 
 #include "Hazel/Math/Math.h"
 
+#include "Hazel/Renderer/Renderer3D.h"
+
 namespace Hazel
 {
 	extern const std::filesystem::path g_AssetPath;
@@ -33,6 +35,7 @@ namespace Hazel
 
 		m_Framebuffer = Hazel::FrameBuffer::Create({ 1280, 720, 1, 
 			{FrameBufferAttachmentFormat::RGBA8, FrameBufferAttachmentFormat::RED_INTEGER,
+			FrameBufferAttachmentFormat::RGBA16F, FrameBufferAttachmentFormat::R8,
 			FrameBufferAttachmentFormat::Depth} });
 
 		m_Texture = Hazel::Texture2D::Create("assets/textures/Checkerboard.png");
@@ -88,6 +91,9 @@ namespace Hazel
 
 		// Clear entity ID to -1
 		m_Framebuffer->ClearAttachment(1, -1);
+		// Clear OIT buffers
+		m_Framebuffer->ClearAttachment(2, glm::vec4(0.0f));
+		m_Framebuffer->ClearAttachment(3, 1.0f);
 
 		switch (m_ToolbarPanel.GetSceneState())
 		{
@@ -97,7 +103,10 @@ namespace Hazel
 				m_CameraController.OnUpdate(ts);
 
 			m_EditorCamera.OnUpdate(ts);
-			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
+			m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera, m_Framebuffer);// Now we just update EditorCamera in Nut-Editor APP, rather than RuntimeCamera in game
+
+			//Renderer3D::CompositePass(m_Framebuffer);
+			
 			//m_ActiveScene->OnScript(ts);// 更新本机脚本
 			break;
 
@@ -248,7 +257,7 @@ namespace Hazel
 		ImGui::Text("Indices: %d", stats.GetIndexCount());
 
 		std::string name = "None";
-		if (m_HoveredEntity)
+		if (m_HoveredEntity && m_HoveredEntity.HasComponent<TagComponent>())
 			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
 		ImGui::Text("Hovered Entity: %s", name.c_str());
 

@@ -1,0 +1,34 @@
+Scene: Untitled
+Entities:
+  - Entity: 8360691681513571957
+    TagComponent:
+      Tag: Armadillo
+    TransformComponent:
+      Translation: [11.624222, 6.373459, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      filePath: assets\objects\Armadillo.ply
+    MaterialComponent:
+      shaderType: WeightedBlendOIT
+      ambient: [0.42704624, 0.42704624, 0.42704624]
+      diffuse: [1, 0, 0]
+      specular: [0.59786475, 0.59786475, 0.59786475]
+      shininess: 32
+      alpha: 0.49
+  - Entity: 1609853466041326062
+    TagComponent:
+      Tag: Sphere
+    TransformComponent:
+      Translation: [5.748229, 29.352146, 22.141577]
+      Rotation: [0, 0, 0]
+      Scale: [13.5, 13.5, 13.5]
+    MeshComponent:
+      filePath: assets\objects\planet\planet.obj
+    MaterialComponent:
+      shaderType: WeightedBlendOIT
+      ambient: [0.16370106, 0.16370106, 0.16370106]
+      diffuse: [1, 1, 1]
+      specular: [0, 0, 0]
+      shininess: 32
+      alpha: 0.5

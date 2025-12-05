@@ -398,13 +398,14 @@ namespace Hazel
 					ImGui::EndCombo();
 				}
 
-				if (currentshaderName == "BlinnPhong")
+				if (currentshaderName == "BlinnPhong" || currentshaderName == "Transparent")
 				{
 					ImGui::ColorEdit3("ambient", glm::value_ptr(component.ambient));
 					ImGui::ColorEdit3("diffuse", glm::value_ptr(component.diffuse));
 					ImGui::ColorEdit3("specular", glm::value_ptr(component.specular));
 
 					ImGui::DragFloat("shininess", &component.shininess, 5.0f, 1.0f, 1024.0f);
+					ImGui::DragFloat("alpha", &component.alpha, 0.01f, 0.0f, 1.0f);
 				}
 			});
 	}

@@ -185,7 +185,7 @@ namespace Hazel
 	enum class ShaderType
 	{
 		BlinnPhong,
-		Transparent,
+		WeightedBlendOIT,
 		PBR
 	};
 	struct MaterialComponent
@@ -196,6 +196,7 @@ namespace Hazel
 		glm::vec3 diffuse = { 1.0f, 1.0f, 1.0f };
 		glm::vec3 specular = { 1.0f, 1.0f, 1.0f };
 		float shininess = 32.0f;
+		float alpha = 0.5f;
 
 		MaterialComponent() = default;
 		MaterialComponent(const MaterialComponent&) = default;

@@ -5,8 +5,9 @@
 #include "Hazel/Core/UUID.h"
 #include "Hazel/Renderer/EditorCamera.h"
 #include <Hazel/Renderer/Model.h>
+#include "Hazel/Renderer/FrameBuffer.h"
 
-class b2World;//前向声明（针对Hazel作用域以外的外部库：Box2D）
+class b2World;
 
 namespace Hazel
 {
@@ -28,7 +29,7 @@ namespace Hazel
 		void OnRuntimeStop();
 
 		void OnUpdateRuntime(Timestep ts);
-		void OnUpdateEditor(Timestep ts, EditorCamera camera);
+		void OnUpdateEditor(Timestep ts, EditorCamera camera, Ref<FrameBuffer> framebuffer);
 		void OnScript(Timestep ts);
 		void OnViewportResize(uint32_t width, uint32_t height);
 

@@ -3,6 +3,7 @@
 
 #include "Hazel/Scene/Entity.h"
 #include "Hazel/Scene/Component.h"
+#include "Hazel/Renderer/Model.h"
 
 namespace YAML {
     template<>
@@ -124,6 +125,35 @@ namespace Hazel
 
         HZ_CORE_ASSERT(false, "Unknown body type");
         return Rigidbody2DComponent::BodyType::Static;
+    }
+
+    static std::string ShaderTypeToString(ShaderType shaderType)
+    {
+        switch (shaderType)
+        {
+        case ShaderType::BlinnPhong:
+            return "BlinnPhong";
+        case ShaderType::WeightedBlendOIT:
+            return "WeightedBlendOIT";
+        case ShaderType::PBR:
+            return "PBR";
+        }
+
+        HZ_CORE_ASSERT(false, "Unknown shader type");
+        return {};
+    }
+
+    static ShaderType StringToShaderType(const std::string& typeString)
+    {
+        if (typeString == "BlinnPhong")
+            return ShaderType::BlinnPhong;
+        else if (typeString == "WeightedBlendOIT")
+            return ShaderType::WeightedBlendOIT;
+        else if (typeString == "PBR")
+            return ShaderType::PBR;
+
+        HZ_CORE_ASSERT(false, "Unknown body type");
+        return ShaderType::BlinnPhong;
     }
 
     // ------------------------------------------------------------------
@@ -343,6 +373,35 @@ namespace Hazel
             out << YAML::EndMap;
         }
 
+        if (entity.HasComponent<MeshComponent>())
+        {
+            out << YAML::Key << "MeshComponent";
+
+            out << YAML::BeginMap;
+
+            auto& meshComponent = entity.GetComponent<MeshComponent>();
+            out << YAML::Key << "filePath" << YAML::Value << meshComponent.filePath;
+
+            out << YAML::EndMap;
+        }
+
+        if (entity.HasComponent<MaterialComponent>())
+        {
+            out << YAML::Key << "MaterialComponent";
+
+            out << YAML::BeginMap;
+
+            auto& materialComponent = entity.GetComponent<MaterialComponent>();
+            out << YAML::Key << "shaderType" << YAML::Value << ShaderTypeToString(materialComponent.shaderType);
+            out << YAML::Key << "ambient" << YAML::Value << materialComponent.ambient;
+            out << YAML::Key << "diffuse" << YAML::Value << materialComponent.diffuse;
+            out << YAML::Key << "specular" << YAML::Value << materialComponent.specular;
+            out << YAML::Key << "shininess" << YAML::Value << materialComponent.shininess;
+            out << YAML::Key << "alpha" << YAML::Value << materialComponent.alpha;
+
+            out << YAML::EndMap;
+        }
+
 
         out << YAML::EndMap;
     }
@@ -425,6 +484,27 @@ namespace Hazel
             cc2c.Friction = circleCollider2DComponent["Friction"].as<float>();
             cc2c.Restitution = circleCollider2DComponent["Restitution"].as<float>();
             cc2c.RestitutionThreshold = circleCollider2DComponent["RestitutionThreshold"].as<float>();
+        }
+
+        auto meshComponent = data["MeshComponent"];
+        if (meshComponent)
+        {
+            auto& mc = entity.AddComponent<MeshComponent>();
+            mc.filePath = meshComponent["filePath"].as<std::string>();
+            if (!mc.filePath.empty())
+                mc.model = CreateRef<Model>(mc.filePath);
+        }
+
+        auto materialComponent = data["MaterialComponent"];
+        if (materialComponent)
+        {
+            auto& mc = entity.AddComponent<MaterialComponent>();
+            mc.shaderType = StringToShaderType(materialComponent["shaderType"].as<std::string>());
+            mc.ambient = materialComponent["ambient"].as<glm::vec3>();
+            mc.diffuse = materialComponent["diffuse"].as<glm::vec3>();
+            mc.specular = materialComponent["specular"].as<glm::vec3>();
+            mc.shininess = materialComponent["shininess"].as<float>();
+            mc.alpha = materialComponent["alpha"].as<float>();
         }
     }
 }

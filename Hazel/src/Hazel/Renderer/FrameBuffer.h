@@ -1,4 +1,5 @@
 #pragma once
+#include <glm/glm.hpp>
 
 namespace Hazel
 {
@@ -18,6 +19,8 @@ namespace Hazel
 		// Color Attachment
 		RGBA8,
 		RED_INTEGER,
+		RGBA16F,
+		R8,
 
 		// Depth / Stencil Attachment
 		DEPTH24STENCIL8,
@@ -60,6 +63,8 @@ namespace Hazel
 		virtual int ReadPixel(uint32_t attachmentIndex, int x, int y) = 0;
 
 		virtual void ClearAttachment(uint32_t attachmentIndex, int value) = 0;
+		virtual void ClearAttachment(uint32_t attachmentIndex, float value) = 0;
+		virtual void ClearAttachment(uint32_t attachmentIndex, const glm::vec4& value) = 0;
 
 		virtual uint32_t GetColorAttachmentRendererID(uint32_t index = 0) const = 0;
 		virtual const FrameBufferSpecification& GetSpecification() const = 0;

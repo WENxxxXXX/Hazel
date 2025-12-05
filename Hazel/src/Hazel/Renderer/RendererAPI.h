@@ -14,6 +14,24 @@ namespace Hazel
 		{
 			None = 0, OpenGL = 1, DirectX = 2
 		};
+
+		enum class BlendFactor
+		{
+			Zero = 0,
+			One,
+			SrcColor,
+			OneMinusSrcColor,
+			SrcAlpha,
+			OneMinusSrcAlpha,
+			DstAlpha,
+			OneMinusDstAlpha,
+			DstColor,
+			OneMinusDstColor,
+			ConstantColor,
+			OneMinusConstantColor,
+			ConstantAlpha,
+			OneMinusConstantAlpha
+		};
 	public:
 		virtual ~RendererAPI() = default;
 
@@ -25,10 +43,22 @@ namespace Hazel
 		virtual void Init() = 0;
 		virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
+		virtual void Flush() = 0;
+
+		virtual void SetBlendFunci(uint32_t buf, BlendFactor src, BlendFactor dst) = 0;
+		virtual void SetColorMaski(uint32_t buf, bool r, bool g, bool b, bool a) = 0;
+		virtual void SetBlendFunc(BlendFactor src, BlendFactor dst) = 0;
+		virtual void SetDepthTest(bool enabled) = 0;
+		virtual void SetDepthMask(bool enabled) = 0;
+
+		virtual void BindTexture(uint32_t rendererID, uint32_t slot) = 0;
+
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) = 0;
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount) = 0;
 
-		inline static API GetAPI() { return s_API; }//注意静态函数使用时的作用域标识
+		virtual void MemoryBarrierTexFetch() = 0;
+
+		inline static API GetAPI() { return s_API; }
 		inline static API SetAPI(API api) { s_API = api; }
 
 	private:

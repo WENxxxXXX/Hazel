@@ -1,0 +1,18 @@
+Scene: Untitled
+Entities:
+  - Entity: 1609853466041326062
+    TagComponent:
+      Tag: 3D Object
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshComponent:
+      filePath: assets\objects\planet\planet.obj
+    MaterialComponent:
+      shaderType: BlinnPhong
+      ambient: [1, 0, 0]
+      diffuse: [1, 1, 1]
+      specular: [1, 1, 1]
+      shininess: 32
+      alpha: 1

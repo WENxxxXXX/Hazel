@@ -6,6 +6,7 @@
 #include "Hazel/Renderer/Renderer3D.h"
 #include "Hazel/Scene/Component.h"
 #include "Hazel/Scene/Entity.h"
+#include "Hazel/Renderer/RendererCommand.h"
 
 #include "glm/glm.hpp"
 
@@ -236,7 +237,7 @@ namespace Hazel
 		for (auto entity : view)
 		{
 			auto& [transform, camera] = view.get<TransformComponent, CameraComponent>(entity);
-			// Èô¼ì²âµ½Ä³ÉãÏñ»ú±»±ê¼ÇÎªÖ÷ÉãÏñ»ú£¬Ôò´«³öÖ÷ÉãÏñ»úµÄÊý¾Ý£¬È»ºóÌø³ö¡£
+			// ï¿½ï¿½ï¿½ï¿½âµ½Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò´«³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (camera.Primary)
 			{
 				mainCamera = &camera.Camera;
@@ -246,13 +247,13 @@ namespace Hazel
 		}
 
 		if (mainCamera) {
-			// Do some rendering (»ñÈ¡µ±Ç°ÉãÏñ»úµÄÍ¶Ó°¾ØÕó projection ºÍ Î»ÒÆ¾ØÕó transform£¬
+			// Do some rendering (ï¿½ï¿½È¡ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¶Ó°ï¿½ï¿½ï¿½ï¿½ projection ï¿½ï¿½ Î»ï¿½Æ¾ï¿½ï¿½ï¿½ transformï¿½ï¿½
 			Renderer2D::BeginScene(*mainCamera, mainTransform);
 
 			
 			// Update rectangles
 			{
-				auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// ÔÚËùÓÐº¬ÓÐ TransformComponent µÄÊµÌåÖÐËÑ¼¯º¬ÓÐ sprite µÄÊµÌå£¬group ·µ»ØÒ»¸öÀàËÆ×¢²á±íµÄÊµÌå¼¯ºÏ
+				auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½ï¿½ï¿½ TransformComponent ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½Ñ¼ï¿½ï¿½ï¿½ï¿½ï¿½ sprite ï¿½ï¿½Êµï¿½å£¬group ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½å¼¯ï¿½ï¿½
 				for (auto entity : group)
 				{
 					auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
@@ -274,13 +275,13 @@ namespace Hazel
 		}
 	}
 
-	void Scene::OnUpdateEditor(Timestep ts, EditorCamera camera)
+	void Scene::OnUpdateEditor(Timestep ts, EditorCamera camera, Ref<FrameBuffer> framebuffer)
 	{
 		Renderer2D::BeginScene(camera);
 
 		// Update rectangles
 		{
-			auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// ÔÚËùÓÐº¬ÓÐ TransformComponent µÄÊµÌåÖÐËÑ¼¯º¬ÓÐ sprite µÄÊµÌå£¬group ·µ»ØÒ»¸öÀàËÆ×¢²á±íµÄÊµÌå¼¯ºÏ
+			auto& group = m_Registry.group<TransformComponent>(entt::get<SpriteComponent>);	// ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½ï¿½ï¿½ TransformComponent ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½Ñ¼ï¿½ï¿½ï¿½ï¿½ï¿½ sprite ï¿½ï¿½Êµï¿½å£¬group ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½å¼¯ï¿½ï¿½
 			for (auto entity : group)
 			{
 				auto [transform, sprite] = group.get<TransformComponent, SpriteComponent>(entity);
@@ -300,38 +301,77 @@ namespace Hazel
 
 		Renderer2D::EndScene();
 
-
+		bool hasOIT = false;
 		Renderer3D::BeginScene(camera);
 		{
 			auto& view = m_Registry.view<TransformComponent, MeshComponent, MaterialComponent>();
 			for (auto entity : view)
 			{
 				auto [transform, mesh, material] = view.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
+				if (material.shaderType == ShaderType::WeightedBlendOIT)
+				{
+					hasOIT = true;
+					continue;
+				}
 				if (mesh.model)
 				{
 					Renderer3D::DrawIndexed(material, transform.GetTransform(),
 						mesh.model->GetVertexArray(), mesh.model->GetIndexBuffer()->GetCount(), (int)entity);
 				}
 			}
+
+			// Transparent Pass
+			RendererCommand::SetDepthTest(true);
+			RendererCommand::SetDepthMask(false);
+			//RendererCommand::SetColorMaski(0, false, false, false, false);
+			//RendererCommand::SetColorMaski(1, true, true, true, true);
+			//RendererCommand::SetColorMaski(2, true, true, true, true);
+			//RendererCommand::SetColorMaski(3, true, true, true, true);
+			RendererCommand::SetBlendFunci(2, RendererAPI::BlendFactor::One, RendererAPI::BlendFactor::One);
+			RendererCommand::SetBlendFunci(3, RendererAPI::BlendFactor::Zero, RendererAPI::BlendFactor::OneMinusSrcColor);
+
+			for (auto entity : view)
+			{
+				auto [transform, mesh, material] = view.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
+				if (material.shaderType != ShaderType::WeightedBlendOIT)
+				{
+					continue;
+				}
+				if (mesh.model)
+				{
+					Renderer3D::DrawIndexed(material, transform.GetTransform(),
+						mesh.model->GetVertexArray(), mesh.model->GetIndexBuffer()->GetCount(), (int)entity);
+				}
+			}
+
+			//RendererCommand::SetColorMaski(0, true, true, true, true);
+			//RendererCommand::SetColorMaski(1, false, false, false, false);
+			//RendererCommand::SetColorMaski(2, false, false, false, false);
+			//RendererCommand::SetColorMaski(3, false, false, false, false);
+			if (hasOIT)
+			{
+				Renderer3D::CompositePass(framebuffer);
+			}
+
+			RendererCommand::SetDepthMask(true);
+			RendererCommand::SetBlendFunc(RendererAPI::BlendFactor::SrcAlpha, RendererAPI::BlendFactor::OneMinusSrcAlpha);
 		}
 		//Renderer3D::EndScene();
-
-
 	}
 
 	void Scene::OnScript(Timestep ts)
 	{
 		// --------------------------------------------------------------------------------------------------------------------------------------------------------
-		// ËùÓÐ¡°º¬ÓÐ½Å±¾×é¼þµÄÊµÌå¡±¶¼½«»á¸üÐÂÆä transform£¬ÒòÎª ScriptableEntity::GetComponent<>() ·µ»Ø m_ScriptableEntity.GetComponent<T>(); 
-		// ¶øÕâ¸ö m_ScriptableEntity ÓÖÊÇ Entity ÀàÐÍµÄ£¬ËùÒÔµ÷ÓÃµÄÊÇ Entity µÄGetComponent<T>()£¬Õâ¾ÍÐèÒª¶Ô m_ScriptableEntity ½øÐÐ³õÊ¼»¯¡£
-		// ÎªÁËÊ¹º¯ÊýÕý³£ÔËÐÐ£¬ÔÚ Scene::OnScript ÖÐ£¬m_ScriptableEntity ±»³õÊ¼»¯Îª Entity{ entity, this }¡£
-		// ÓÉÓÚ´ËÊ±ÔÚ»Øµ÷º¯Êý each ÖÐ£¬Entity{ entity, this }µÄµÚÒ»¸ö²ÎÊýÊÇÓÐ»Øµ÷º¯Êý×Ô¶¯»ñÈ¡µÄ£¬ËùÒÔÕâ¸ö²ÎÊýÌîÈëµÄ erntity Ó¦¸ÃÊÇÕýÔÚ´¦ÀíµÄÊµÌå£¬Ò²¾ÍÊÇº¬ÓÐ½Å±¾×é¼þµÄÊµÌå¡£
+		// ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Ð½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½å¡±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ transformï¿½ï¿½ï¿½ï¿½Îª ScriptableEntity::GetComponent<>() ï¿½ï¿½ï¿½ï¿½ m_ScriptableEntity.GetComponent<T>(); 
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ m_ScriptableEntity ï¿½ï¿½ï¿½ï¿½ Entity ï¿½ï¿½ï¿½ÍµÄ£ï¿½ï¿½ï¿½ï¿½Ôµï¿½ï¿½Ãµï¿½ï¿½ï¿½ Entity ï¿½ï¿½GetComponent<T>()ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ m_ScriptableEntity ï¿½ï¿½ï¿½Ð³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
+		// Îªï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ Scene::OnScript ï¿½Ð£ï¿½m_ScriptableEntity ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Îª Entity{ entity, this }ï¿½ï¿½
+		// ï¿½ï¿½ï¿½Ú´ï¿½Ê±ï¿½Ú»Øµï¿½ï¿½ï¿½ï¿½ï¿½ each ï¿½Ð£ï¿½Entity{ entity, this }ï¿½Äµï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½È¡ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ erntity Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½å£¬Ò²ï¿½ï¿½ï¿½Çºï¿½ï¿½Ð½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½å¡£
 
-		// ËùÒÔËµÕâ½«¸üÐÂËùÓÐ°üº¬½Å±¾×é¼þµÄÊµÌå£¬¶øÇÒÃ¿Ò»¸öÊµÌåµÄ transform ¸Ä±äµÄÊýÖµÏàÍ¬£¬Õâµ¼ÖÂÃ¿Ò»¸öÊµÌå¶¼»áÊÜ¼üÅÌÓ°Ïì¶øÒÆ¶¯£¬¾¡¹Ü´ËÊ±Ö»ÓÐÒ»¸öÊµÌå±»ÏÔÊ¾³öÀ´¡£
+		// ï¿½ï¿½ï¿½ï¿½Ëµï¿½â½«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð°ï¿½ï¿½ï¿½ï¿½Å±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½å£¬ï¿½ï¿½ï¿½ï¿½Ã¿Ò»ï¿½ï¿½Êµï¿½ï¿½ï¿½ transform ï¿½Ä±ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Í¬ï¿½ï¿½ï¿½âµ¼ï¿½ï¿½Ã¿Ò»ï¿½ï¿½Êµï¿½å¶¼ï¿½ï¿½ï¿½Ü¼ï¿½ï¿½ï¿½Ó°ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü´ï¿½Ê±Ö»ï¿½ï¿½Ò»ï¿½ï¿½Êµï¿½å±»ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		// --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-		// Update scripts£¨¶ÔËùÓÐº¬ÓÐ NativeScriptComponent µÄ×é¼þ½øÐÐ´¦Àí£¬´¦Àí·½Ê½ÓÉ lambda ¶¨Òå£©
+		// Update scriptsï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½ï¿½ï¿½ NativeScriptComponent ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ lambda ï¿½ï¿½ï¿½å£©
 		m_Registry.view<NativeScriptComponent, CameraComponent>().each
 		(
 			[=](auto entity, auto& nsc, auto& cc)// nsc => NativeScriptComponent, cc => CameraComponent
@@ -339,7 +379,7 @@ namespace Hazel
 				if (!nsc.Instance)
 				{
 					nsc.Instance = nsc.InstantiateScript();
-					// »Øµ÷º¯ÊýÖÐµÄentityÊÇÒ»¸öuint£¬¼ÇÔØid,¹ÊÐèÒªÎªm_ScriptableEntityµ÷ÓÃ¹¹Ôìº¯Êý£¬´«ÈëidºÍSceneµÄÖ¸Õë¡£
+					// ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½entityï¿½ï¿½Ò»ï¿½ï¿½uintï¿½ï¿½ï¿½ï¿½ï¿½ï¿½id,ï¿½ï¿½ï¿½ï¿½ÒªÎªm_ScriptableEntityï¿½ï¿½ï¿½Ã¹ï¿½ï¿½ìº¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½idï¿½ï¿½Sceneï¿½ï¿½Ö¸ï¿½ë¡£
 					nsc.Instance->m_ScriptableEntity = Entity{ entity, this };
 
 					nsc.Instance->OnCreate();

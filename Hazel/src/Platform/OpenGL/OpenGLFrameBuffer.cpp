@@ -2,6 +2,7 @@
 #include "OpenGLFrameBuffer.h"
 
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 // -------------------------------------------------------------------------------------------
 // ------------------------------------ Utils ------------------------------------------------
@@ -28,6 +29,8 @@ namespace Utils
 		{
 		case Hazel::FrameBufferAttachmentFormat::RGBA8:	return GL_RGBA8;
 		case Hazel::FrameBufferAttachmentFormat::RED_INTEGER: return GL_RED_INTEGER;
+		case Hazel::FrameBufferAttachmentFormat::RGBA16F: return GL_RGBA;
+		case Hazel::FrameBufferAttachmentFormat::R8: return GL_RED;
 		}
 		return 0;
 	}
@@ -56,7 +59,7 @@ namespace Utils
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		}
@@ -147,6 +150,12 @@ namespace Hazel
 				case FrameBufferAttachmentFormat::RED_INTEGER:
 					Utils::AttachColorTexture(m_ColorAttachmentIDs[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
 					break;
+				case FrameBufferAttachmentFormat::RGBA16F:
+					Utils::AttachColorTexture(m_ColorAttachmentIDs[i], m_Specification.Samples, GL_RGBA16F, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
+					break;
+				case FrameBufferAttachmentFormat::R8:
+					Utils::AttachColorTexture(m_ColorAttachmentIDs[i], m_Specification.Samples, GL_R8, GL_RED, m_Specification.Width, m_Specification.Height, i);
+					break;
 				}
 			}
 		}
@@ -185,7 +194,7 @@ namespace Hazel
 	void OpenGLFrameBuffer::Bind()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-		// ¼°Ê±ÎªäÖÈ¾½á¹û¸üÐÂÊÓ¿Ú
+		// ï¿½ï¿½Ê±Îªï¿½ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½
 		glViewport(0, 0, m_Specification.Width, m_Specification.Height);
 	}
 
@@ -223,6 +232,26 @@ namespace Hazel
 		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
 		glClearTexImage(m_ColorAttachmentIDs[attachmentIndex], 0, 
 			Utils::HazelTexFormatToGL(spec), GL_INT, &value);
+	}
+
+	void OpenGLFrameBuffer::ClearAttachment(uint32_t attachmentIndex, float value)
+	{
+		HZ_CORE_ASSERT((attachmentIndex < m_ColorAttachmentIDs.size()),
+			"Make sure that attachment_index you typed is in the scope of Attachments which we set ")
+
+		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
+		glClearTexImage(m_ColorAttachmentIDs[attachmentIndex], 0,
+			Utils::HazelTexFormatToGL(spec), GL_FLOAT, &value);
+	}
+
+	void OpenGLFrameBuffer::ClearAttachment(uint32_t attachmentIndex, const glm::vec4& value)
+	{
+		HZ_CORE_ASSERT((attachmentIndex < m_ColorAttachmentIDs.size()),
+			"Make sure that attachment_index you typed is in the scope of Attachments which we set ")
+
+		auto& spec = m_ColorAttachmentSpecifications[attachmentIndex];
+		glClearTexImage(m_ColorAttachmentIDs[attachmentIndex], 0,
+			Utils::HazelTexFormatToGL(spec), GL_FLOAT, glm::value_ptr(value));
 	}
 
 

@@ -7,7 +7,7 @@ namespace Hazel
 {
 
 	
-	//±¨´íÐÅÏ¢»Øµ÷º¯Êý(OpenGLMessageCallback)¶¨Òå
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½(OpenGLMessageCallback)ï¿½ï¿½ï¿½ï¿½
 	void OpenGLMessageCallback
 	(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam)
 	{
@@ -22,16 +22,38 @@ namespace Hazel
 		HZ_CORE_ASSERT(false, "Unknown severity level!");
 	}
 
+	GLenum OpenGLBlendFactorToGL(RendererAPI::BlendFactor factor)
+	{
+		switch (factor)
+		{
+		case RendererAPI::BlendFactor::Zero: return GL_ZERO;
+		case RendererAPI::BlendFactor::One: return GL_ONE;
+		case RendererAPI::BlendFactor::SrcColor: return GL_SRC_COLOR;
+		case RendererAPI::BlendFactor::OneMinusSrcColor: return GL_ONE_MINUS_SRC_COLOR;
+		case RendererAPI::BlendFactor::SrcAlpha: return GL_SRC_ALPHA;
+		case RendererAPI::BlendFactor::OneMinusSrcAlpha: return GL_ONE_MINUS_SRC_ALPHA;
+		case RendererAPI::BlendFactor::DstAlpha: return GL_DST_ALPHA;
+		case RendererAPI::BlendFactor::OneMinusDstAlpha: return GL_ONE_MINUS_DST_ALPHA;
+		case RendererAPI::BlendFactor::DstColor: return GL_DST_COLOR;
+		case RendererAPI::BlendFactor::OneMinusDstColor: return GL_ONE_MINUS_DST_COLOR;
+		case RendererAPI::BlendFactor::ConstantColor: return GL_CONSTANT_COLOR;
+		case RendererAPI::BlendFactor::OneMinusConstantColor: return GL_ONE_MINUS_CONSTANT_COLOR;
+		case RendererAPI::BlendFactor::ConstantAlpha: return GL_CONSTANT_ALPHA;
+		case RendererAPI::BlendFactor::OneMinusConstantAlpha: return GL_ONE_MINUS_CONSTANT_ALPHA;
+		}
+		return 0;
+	}
+
 	void OpenGLRendererAPI::Init()
 	{
 		HZ_PROFILE_FUNCTION();
 
 #ifdef HZ_DEBUG
-		//¿ØÖÆOpenGLÉú³ÉµÄµ÷ÊÔÏûÏ¢µÄÉú³ÉºÍ¹ýÂË
+		//ï¿½ï¿½ï¿½ï¿½OpenGLï¿½ï¿½ï¿½ÉµÄµï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ÉºÍ¹ï¿½ï¿½ï¿½
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
-		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+		//glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 #endif
 
@@ -47,6 +69,11 @@ namespace Hazel
 		glViewport(x, y, width, height);
 	}
 
+	void OpenGLRendererAPI::Flush()
+	{
+		glFlush();
+	}
+	
 	void OpenGLRendererAPI::Clear()
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -57,11 +84,44 @@ namespace Hazel
 		glClearColor(color.r, color.g, color.b, color.a);
 	}
 
+	void OpenGLRendererAPI::SetBlendFunci(uint32_t buf, RendererAPI::BlendFactor src, RendererAPI::BlendFactor dst)
+	{
+		glBlendFunci(buf, OpenGLBlendFactorToGL(src), OpenGLBlendFactorToGL(dst));
+	}
+
+	void OpenGLRendererAPI::SetColorMaski(uint32_t buf, bool r, bool g, bool b, bool a)
+	{
+		glColorMaski(buf, r, g, b, a);
+	}
+
+	void OpenGLRendererAPI::SetBlendFunc(RendererAPI::BlendFactor src, RendererAPI::BlendFactor dst)
+	{
+		glBlendFunc(OpenGLBlendFactorToGL(src), OpenGLBlendFactorToGL(dst));
+	}
+
+	void OpenGLRendererAPI::SetDepthTest(bool enabled)
+	{
+		if (enabled)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+	}
+
+	void OpenGLRendererAPI::SetDepthMask(bool enabled)
+	{
+		glDepthMask(enabled ? GL_TRUE : GL_FALSE);
+	}
+
+	void OpenGLRendererAPI::BindTexture(uint32_t rendererID, uint32_t slot)
+	{
+		glBindTextureUnit(slot, rendererID);
+	}
+
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray)
 	{
 		vertexArray->Bind();
 		glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
-		glBindTexture(GL_TEXTURE_2D, 0);//äÖÈ¾ÍêÖ®ºó£¬½â°óµ±Ç°ÎÆÀí£¬±ÜÃâÓ°Ïìµ½ºóÐøÎïÌåÎÆÀíµÄäÖÈ¾
+		glBindTexture(GL_TEXTURE_2D, 0);//ï¿½ï¿½È¾ï¿½ï¿½Ö®ï¿½ó£¬½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó°ï¿½ìµ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
@@ -70,6 +130,11 @@ namespace Hazel
 
 		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void OpenGLRendererAPI::MemoryBarrierTexFetch()
+	{
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 	}
 
 	// Cherno do:
