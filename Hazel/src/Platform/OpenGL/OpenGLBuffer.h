@@ -43,4 +43,43 @@ namespace Hazel
 		uint32_t m_Count;
 	};
 
+	//////////////////////////////////////////////////////
+	/////////////////// PixelUnpackBuffer ////////////////
+	//////////////////////////////////////////////////////
+	class OpenGLPixelUnpackBuffer : public PixelUnpackBuffer
+	{
+	public:
+		OpenGLPixelUnpackBuffer(uint32_t size);
+		~OpenGLPixelUnpackBuffer();
+
+		void Bind() const override;
+		void Unbind() const override;
+
+		void* MapBuffer() const override;
+		void UnmapBuffer() const override;
+	private:
+		uint32_t m_RendererID;
+	};
+
+	//////////////////////////////////////////////////////
+	/////////////////// AtomicCounterBuffer //////////////
+	//////////////////////////////////////////////////////
+	class OpenGLAtomicCounterBuffer : public AtomicCounterBuffer
+	{
+	public:
+		OpenGLAtomicCounterBuffer();
+		~OpenGLAtomicCounterBuffer();
+
+		void Bind() const override;
+		void BindBase(uint32_t index) const override;
+		void Unbind() const override;
+
+		void* MapBuffer() const override;
+		void UnmapBuffer() const override;
+		void Reset(uint32_t value) const override;
+		uint32_t GetRendererID() const override { return m_RendererID; }
+	private:
+		uint32_t m_RendererID;
+	};
+
 }

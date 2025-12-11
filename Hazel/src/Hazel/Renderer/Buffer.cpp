@@ -54,4 +54,36 @@ namespace Hazel
 		HZ_CORE_ASSERT(false, "Unknown Renderer API!")
 			return nullptr;
 	}
+
+	Ref<PixelUnpackBuffer> PixelUnpackBuffer::Create(uint32_t size)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+		case RendererAPI::API::None:	HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported! ")
+			return nullptr;
+		case RendererAPI::API::OpenGL:
+			return CreateRef<OpenGLPixelUnpackBuffer>(size);
+		case RendererAPI::API::DirectX:	HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported! ")
+			return nullptr;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown Renderer API!")
+			return nullptr;
+	}
+
+	Ref<AtomicCounterBuffer> AtomicCounterBuffer::Create()
+	{
+		switch (RendererAPI::GetAPI())
+		{
+		case RendererAPI::API::None:	HZ_CORE_ASSERT(false, "RendererAPI::None is currently not supported! ")
+			return nullptr;
+		case RendererAPI::API::OpenGL:
+			return CreateRef<OpenGLAtomicCounterBuffer>();
+		case RendererAPI::API::DirectX:	HZ_CORE_ASSERT(false, "RendererAPI::DirectX is currently not supported! ")
+			return nullptr;
+		}
+
+		HZ_CORE_ASSERT(false, "Unknown Renderer API!")
+			return nullptr;
+	}
 }

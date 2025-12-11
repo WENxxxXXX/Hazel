@@ -301,16 +301,17 @@ namespace Hazel
 
 		Renderer2D::EndScene();
 
-		bool hasOIT = false;
+		bool hasWeightedBlendOIT = false;
+		bool hasLinkedListOIT = false;
 		Renderer3D::BeginScene(camera);
 		{
 			auto& view = m_Registry.view<TransformComponent, MeshComponent, MaterialComponent>();
 			for (auto entity : view)
 			{
 				auto [transform, mesh, material] = view.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
-				if (material.shaderType == ShaderType::WeightedBlendOIT)
+				if (material.shaderType == ShaderType::WeightedBlendOIT || 
+					material.shaderType == ShaderType::LinkedListOIT_Build)
 				{
-					hasOIT = true;
 					continue;
 				}
 				if (mesh.model)
@@ -323,10 +324,6 @@ namespace Hazel
 			// Transparent Pass
 			RendererCommand::SetDepthTest(true);
 			RendererCommand::SetDepthMask(false);
-			//RendererCommand::SetColorMaski(0, false, false, false, false);
-			//RendererCommand::SetColorMaski(1, true, true, true, true);
-			//RendererCommand::SetColorMaski(2, true, true, true, true);
-			//RendererCommand::SetColorMaski(3, true, true, true, true);
 			RendererCommand::SetBlendFunci(2, RendererAPI::BlendFactor::One, RendererAPI::BlendFactor::One);
 			RendererCommand::SetBlendFunci(3, RendererAPI::BlendFactor::Zero, RendererAPI::BlendFactor::OneMinusSrcColor);
 
@@ -337,6 +334,7 @@ namespace Hazel
 				{
 					continue;
 				}
+				hasWeightedBlendOIT = true;
 				if (mesh.model)
 				{
 					Renderer3D::DrawIndexed(material, transform.GetTransform(),
@@ -344,13 +342,28 @@ namespace Hazel
 				}
 			}
 
-			//RendererCommand::SetColorMaski(0, true, true, true, true);
-			//RendererCommand::SetColorMaski(1, false, false, false, false);
-			//RendererCommand::SetColorMaski(2, false, false, false, false);
-			//RendererCommand::SetColorMaski(3, false, false, false, false);
-			if (hasOIT)
+			for (auto entity : view)
+			{
+				auto [transform, mesh, material] = view.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
+				if (material.shaderType != ShaderType::LinkedListOIT_Build)
+				{
+					continue;
+				}
+				hasLinkedListOIT = true;
+				if (mesh.model)
+				{
+					Renderer3D::DrawIndexed(material, transform.GetTransform(),
+						mesh.model->GetVertexArray(), mesh.model->GetIndexBuffer()->GetCount(), (int)entity);
+				}
+			}
+
+			if (hasWeightedBlendOIT)
 			{
 				Renderer3D::CompositePass(framebuffer);
+			}
+			else if (hasLinkedListOIT)
+			{
+				Renderer3D::ResolveOIT(framebuffer);
 			}
 
 			RendererCommand::SetDepthMask(true);
@@ -361,17 +374,6 @@ namespace Hazel
 
 	void Scene::OnScript(Timestep ts)
 	{
-		// --------------------------------------------------------------------------------------------------------------------------------------------------------
-		// ���С����нű������ʵ�塱����������� transform����Ϊ ScriptableEntity::GetComponent<>() ���� m_ScriptableEntity.GetComponent<T>(); 
-		// ����� m_ScriptableEntity ���� Entity ���͵ģ����Ե��õ��� Entity ��GetComponent<T>()�������Ҫ�� m_ScriptableEntity ���г�ʼ����
-		// Ϊ��ʹ�����������У��� Scene::OnScript �У�m_ScriptableEntity ����ʼ��Ϊ Entity{ entity, this }��
-		// ���ڴ�ʱ�ڻص����� each �У�Entity{ entity, this }�ĵ�һ���������лص������Զ���ȡ�ģ����������������� erntity Ӧ�������ڴ�����ʵ�壬Ҳ���Ǻ��нű������ʵ�塣
-
-		// ����˵�⽫�������а����ű������ʵ�壬����ÿһ��ʵ��� transform �ı����ֵ��ͬ���⵼��ÿһ��ʵ�嶼���ܼ���Ӱ����ƶ������ܴ�ʱֻ��һ��ʵ�屻��ʾ������
-		// --------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-		// Update scripts�������к��� NativeScriptComponent ��������д�����������ʽ�� lambda ���壩
 		m_Registry.view<NativeScriptComponent, CameraComponent>().each
 		(
 			[=](auto entity, auto& nsc, auto& cc)// nsc => NativeScriptComponent, cc => CameraComponent

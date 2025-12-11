@@ -6,7 +6,7 @@
 namespace Hazel
 {
 	// !!! This Function needs to be used with "SetData" !!!
-	// ½ö´´½¨ÁËÎÆÀíµÄ´æ´¢¿Õ¼ä£¬Ã»ÓÐ¶¨Òå¾ßÌå´æ´¢Öµ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä´æ´¢ï¿½Õ¼ä£¬Ã»ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ´¢Öµ
 	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
 		:m_Width(width), m_Height(height)
 	{
@@ -16,12 +16,57 @@ namespace Hazel
 		m_DataFormat = GL_RGBA;
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
-		// ´¢´æÊý¾Ý(width ºÍ height ±íÊ¾ÏñËØµã¸öÊýÐÎ³ÉµÄ¿íÓë¸ß£©
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(width ï¿½ï¿½ height ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½Øµï¿½ï¿½ï¿½ï¿½ï¿½Î³ÉµÄ¿ï¿½ï¿½ï¿½ß£ï¿½
 		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
 
-		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);//ÎÆÀí¹ýÂË
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);//ÎÆÀí»·ÈÆÄ£Ê½
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, ImageFormat format)
+		:m_Width(width), m_Height(height)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		m_InternalFormat = GL_RGBA8;
+		m_DataFormat = GL_RGBA;
+
+		switch (format)
+		{
+		case ImageFormat::R8:
+			m_InternalFormat = GL_R8;
+			m_DataFormat = GL_RED;
+			break;
+		case ImageFormat::RGB8:
+			m_InternalFormat = GL_RGB8;
+			m_DataFormat = GL_RGB;
+			break;
+		case ImageFormat::RGBA8:
+			m_InternalFormat = GL_RGBA8;
+			m_DataFormat = GL_RGBA;
+			break;
+		case ImageFormat::RGBA32F:
+			m_InternalFormat = GL_RGBA32F;
+			m_DataFormat = GL_RGBA;
+			break;
+		case ImageFormat::R32UI:
+			m_InternalFormat = GL_R32UI;
+			m_DataFormat = GL_RED_INTEGER;
+			break;
+		case ImageFormat::RGBA32UI:
+			m_InternalFormat = GL_RGBA32UI;
+			m_DataFormat = GL_RGBA_INTEGER;
+			break;
+		}
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
+		glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
+
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
@@ -43,7 +88,7 @@ namespace Hazel
 		m_Width = width;
 		m_Height = height;
 
-		GLenum internalFormat = 0, dataFormat = 0;										// Êý¾ÝÄÚ²¿´¢´æ¸ñÊ½ ºÍ Êý¾ÝµÄÉÏ´«¸ñÊ½
+		GLenum internalFormat = 0, dataFormat = 0;										// ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ýµï¿½ï¿½Ï´ï¿½ï¿½ï¿½Ê½
 		if (channels == 3) {
 			internalFormat = GL_RGB8;
 			dataFormat = GL_RGB;
@@ -62,7 +107,7 @@ namespace Hazel
 
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);//ÎÆÀí»·ÈÆÄ£Ê½
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, 
 			dataFormat, GL_UNSIGNED_BYTE, data);
@@ -76,13 +121,13 @@ namespace Hazel
 		glDeleteTextures(1, &m_RendererID);
 	}
 
-	void OpenGLTexture2D::SetData(void* data, uint32_t size)// Êý¾ÝºÍÊý¾ÝÄÚ´æ´óÐ¡
+	void OpenGLTexture2D::SetData(void* data, uint32_t size)// ï¿½ï¿½ï¿½Ýºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½Ð¡
 	{
 		HZ_PROFILE_FUNCTION();
 
 		uint32_t bpp = (m_DataFormat == GL_RGBA ? 4 : 3);
 		HZ_CORE_ASSERT((size == m_Width * m_Height * bpp), "Data must contain the full texture! Please check that the size of the data matches the format of the data");
-		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);// ÉÏ´«Êý¾Ý
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);// ï¿½Ï´ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
 
 	void OpenGLTexture2D::Bind(uint32_t slot) const
@@ -90,6 +135,76 @@ namespace Hazel
 		HZ_PROFILE_FUNCTION();
 
 		glBindTextureUnit(slot, m_RendererID);
+	}
+
+	void OpenGLTexture2D::BindImageTexture(uint32_t unit) const
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glBindImageTexture(unit, m_RendererID, 0, GL_TRUE, 0, GL_READ_WRITE, m_InternalFormat);
+	}
+
+	OpenGLTextureBuffer::OpenGLTextureBuffer(uint32_t size, ImageFormat format)
+		: m_Size(size)
+	{
+		HZ_PROFILE_FUNCTION();
+
+		m_InternalFormat = GL_RGBA8;
+
+		switch (format)
+		{
+		case ImageFormat::R8:
+			m_InternalFormat = GL_R8;
+			break;
+		case ImageFormat::RGB8:
+			m_InternalFormat = GL_RGB8;
+			break;
+		case ImageFormat::RGBA8:
+			m_InternalFormat = GL_RGBA8;
+			break;
+		case ImageFormat::RGBA32F:
+			m_InternalFormat = GL_RGBA32F;
+			break;
+		case ImageFormat::R32UI:
+			m_InternalFormat = GL_R32UI;
+			break;
+		case ImageFormat::RGBA32UI:
+			m_InternalFormat = GL_RGBA32UI;
+			break;
+		}
+
+		glCreateBuffers(1, &m_BufferID);
+		glBindBuffer(GL_TEXTURE_BUFFER, m_BufferID);
+		glBufferData(GL_TEXTURE_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+
+		glCreateTextures(GL_TEXTURE_BUFFER, 1, &m_RendererID);
+		glTextureBuffer(m_RendererID, m_InternalFormat, m_BufferID);
+	}
+
+	OpenGLTextureBuffer::~OpenGLTextureBuffer()
+	{
+		HZ_PROFILE_FUNCTION();
+
+		glDeleteTextures(1, &m_RendererID);
+		glDeleteBuffers(1, &m_BufferID);
+	}
+
+	void OpenGLTextureBuffer::SetData(void* data, uint32_t size)
+	{
+		glBindBuffer(GL_TEXTURE_BUFFER, m_BufferID);
+		glBufferSubData(GL_TEXTURE_BUFFER, 0, size, data);
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+	}
+
+	void OpenGLTextureBuffer::Bind(uint32_t slot) const
+	{
+		glBindTextureUnit(slot, m_RendererID);
+	}
+
+	void OpenGLTextureBuffer::BindImageTexture(uint32_t unit) const
+	{
+		glBindImageTexture(unit, m_RendererID, 0, GL_FALSE, 0, GL_READ_WRITE, m_InternalFormat);
 	}
 
 }

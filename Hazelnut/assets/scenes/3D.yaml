@@ -4,15 +4,31 @@ Entities:
     TagComponent:
       Tag: 3D Object
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [6.273322, 0, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Scale: [100, 100, 100]
+    MeshComponent:
+      filePath: assets\objects\bun_zipper.ply
+    MaterialComponent:
+      shaderType: WeightedBlendOIT
+      ambient: [0.47686833, 0.47686833, 0.47686833]
+      diffuse: [1, 0, 0]
+      specular: [0.3950178, 0.3950178, 0.3950178]
+      shininess: 32
+      alpha: 0.59
+  - Entity: 18251497320228628810
+    TagComponent:
+      Tag: Sphere
+    TransformComponent:
+      Translation: [4.878616, 2.3267863, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1.0953206, 1.0953206, 1.0953206]
     MeshComponent:
       filePath: assets\objects\planet\planet.obj
     MaterialComponent:
       shaderType: BlinnPhong
-      ambient: [1, 0, 0]
+      ambient: [1, 1, 1]
       diffuse: [1, 1, 1]
       specular: [1, 1, 1]
       shininess: 32
-      alpha: 1
+      alpha: 0.72

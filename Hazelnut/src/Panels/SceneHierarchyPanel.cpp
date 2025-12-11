@@ -378,12 +378,12 @@ namespace Hazel
 		DrawComponent<MaterialComponent>("Material", entity, [](auto& component)
 			{
 				// --------- Draw Combo Box --------
-				const char* shaderNames[] = { "BlinnPhong", "Transparent", "PBR" };
+				const char* shaderNames[] = { "BlinnPhong", "Transparent", "LinkedListOIT_Build", "PBR" };
 				const char* currentshaderName = shaderNames[(int)component.shaderType];
 				if (ImGui::BeginCombo("Shader", currentshaderName))			// Combo box preview value needs to be a c_str
 				{
 					// -------- Draw drop-down Selection List --------
-					for (int i = 0; i < 3; i++)
+					for (int i = 0; i < 4; i++)
 					{
 						bool isSelected = (shaderNames[i] == currentshaderName);
 						if (ImGui::Selectable(shaderNames[i], isSelected))		// (What isSelected do:) Is this option is current projection type ? Default highlight : Not highlight
@@ -398,7 +398,8 @@ namespace Hazel
 					ImGui::EndCombo();
 				}
 
-				if (currentshaderName == "BlinnPhong" || currentshaderName == "Transparent")
+				if (currentshaderName == "BlinnPhong" || currentshaderName == "Transparent" || 
+					currentshaderName == "LinkedListOIT_Build")
 				{
 					ImGui::ColorEdit3("ambient", glm::value_ptr(component.ambient));
 					ImGui::ColorEdit3("diffuse", glm::value_ptr(component.diffuse));

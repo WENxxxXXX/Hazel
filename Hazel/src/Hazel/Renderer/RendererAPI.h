@@ -41,6 +41,7 @@ namespace Hazel
 		virtual void SetClearColor(const glm::vec4& color) = 0;
 
 		virtual void Init() = 0;
+		virtual std::pair<int, int> GetMaxMonitorSize() = 0;
 		virtual void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
 		virtual void Flush() = 0;

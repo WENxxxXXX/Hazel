@@ -186,6 +186,7 @@ namespace Hazel
 	{
 		BlinnPhong,
 		WeightedBlendOIT,
+		LinkedListOIT_Build,
 		PBR
 	};
 	struct MaterialComponent

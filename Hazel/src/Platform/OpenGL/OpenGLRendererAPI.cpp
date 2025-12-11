@@ -2,6 +2,7 @@
 #include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace Hazel
 {
@@ -62,6 +63,20 @@ namespace Hazel
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_DEPTH_TEST);
+	}
+
+	std::pair<int, int> OpenGLRendererAPI::GetMaxMonitorSize()
+	{
+		std::pair<int, int> res;
+		int monitorCount = 0;
+		GLFWmonitor** pMonitor = glfwGetMonitors(&monitorCount);
+		for (int i = 0; i < monitorCount; ++i)
+		{
+			const GLFWvidmode* mode = glfwGetVideoMode(pMonitor[i]);
+			res.first = std::max(res.first, mode->width);
+			res.second = std::max(res.second, mode->height);
+		}
+		return res;
 	}
 
 	void OpenGLRendererAPI::SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
@@ -134,7 +149,7 @@ namespace Hazel
 
 	void OpenGLRendererAPI::MemoryBarrierTexFetch()
 	{
-		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
 	}
 
 	// Cherno do:

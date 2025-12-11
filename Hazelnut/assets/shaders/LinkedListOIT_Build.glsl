@@ -1,4 +1,4 @@
-// WeightedBlend_Transparent Shader
+// LinkedListOIT_Build Shader
 
 #type vertex
 #version 450 core
@@ -11,8 +11,6 @@ layout(location = 1) in vec3 a_Norm;
 uniform mat4 u_ViewProjection;
 uniform mat4 u_Transform;
 
-//out vec4 v_Color;
-//out vec2 v_TexCoord;
 out vec3 v_FragPos;
 out vec3 v_Normal;
 
@@ -27,12 +25,9 @@ void main()
 #type fragment
 #version 450 core
 
-layout(location = 1) out int color2;
-layout(location = 2) out vec4 accum;
-layout(location = 3) out float reveal;
-
-in vec3 v_FragPos;
-in vec3 v_Normal;
+//必须显式开启，因为本着色器涉及原子计数器和图像存储，可能不会隐式开启提前深度测试；
+//而如果不开启提前深度测试，则某些被不透明物体挡住的半透明片元会被写入到链表中，导致混合错误。
+layout(early_fragment_tests) in;
 
 struct Material {
     vec3 ambient;
@@ -50,6 +45,9 @@ struct DirLight {
     vec3 specular;
 };
 
+in vec3 v_FragPos;
+in vec3 v_Normal;
+
 uniform vec3 viewPos;
 uniform Material material;
 uniform DirLight dirLight;
@@ -58,28 +56,32 @@ uniform int u_entityID;
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 ambient, vec3 diffuse, vec3 specular, float shininess);
 
+layout (binding = 0, r32ui) uniform uimage2D head_pointer_image;
+layout (binding = 1, rgba32ui) uniform writeonly uimageBuffer list_buffer;
+layout (binding = 0, offset = 0) uniform atomic_uint list_counter;
+
 void main()
 {
+    uint index;
+    uint old_head;
+    uvec4 item;
+
+    //得到旧值，即第一个执行片元为1，第二个为2...
+    //相当于一个新的索引
+    index = atomicCounterIncrement(list_counter);
+    //链表的头部现在指向新索引，新索引的节点将指向old_head，头插
+    old_head = imageAtomicExchange(head_pointer_image, ivec2(gl_FragCoord.xy), uint(index));
+
     vec3 viewDir = normalize(viewPos - v_FragPos);
     vec3 norm = normalize(dot(v_Normal, viewDir) * v_Normal);
 
     vec3 result = CalcDirLight(dirLight, norm, viewDir, material.ambient, material.diffuse, material.specular, material.shininess);
 
-    //float gainValue = length(cross(norm, viewDir));
-    //result += vec3(max(gainValue - 0.6, 0.0)) * 4.0;A
-
-    vec4 color = vec4(result, material.alpha);
-
-    color2 = u_entityID;
-
-    float weight = clamp(
-        pow(min(1.0, color.a * 10.0) + 0.01, 3.0) *
-        1e8 * pow(1.0 - gl_FragCoord.z * 0.9, 3.0),
-        1e-2,
-        3e3
-    );
-    accum = vec4(color.rgb * color.a, color.a) * weight;
-    reveal = color.a;
+    item.x = old_head;
+    item.y = packUnorm4x8(vec4(result, material.alpha));
+    item.z = floatBitsToUint(gl_FragCoord.z);
+    item.w = u_entityID;
+    imageStore(list_buffer, int(index), item);
 }
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 ambient, vec3 diffuse, vec3 specular, float shininess)

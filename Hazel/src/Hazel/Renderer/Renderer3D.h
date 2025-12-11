@@ -21,5 +21,6 @@ namespace Hazel
 			const Ref<VertexArray>& vertexArray, uint32_t indexCount, int entityID);
 
 		static void CompositePass(const Ref<FrameBuffer>& framebuffer);
+		static void ResolveOIT(const Ref<FrameBuffer>& framebuffer);
 	};
 }

@@ -15,7 +15,12 @@ namespace Hazel
 		inline static void Init()
 		{
 			s_RendererAPI->Init();
-		}		
+		}
+
+		inline static std::pair<int, int> GetMaxMonitorSize()
+		{
+			return s_RendererAPI->GetMaxMonitorSize();
+		}
 		
 		inline static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 		{
@@ -78,7 +83,7 @@ namespace Hazel
 
 		inline static void MemeryBarrierTexFetch()
 		{
-
+			s_RendererAPI->MemoryBarrierTexFetch();
 		}
 
 	private:

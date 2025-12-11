@@ -46,7 +46,7 @@ namespace Hazel
 			:Type(type), Name(name), Size(ShaderDataTypeSize(type)), Offset(0), 
 			Count(GetComponentCount()), Normalized(normalized), 
 			GLType(GetTypeToGLType(type))
-			//ÕâÀïµÄ Size ÊÇÄ³Ò»¸ö¶¥µãÊôÐÔÖÐÍêÕûµÄÒ»¸ö·ÖÁ¿µÄ×Ö½Ú´óÐ¡£¨x1,y1,z1£©
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ Size ï¿½ï¿½Ä³Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½Ú´ï¿½Ð¡ï¿½ï¿½x1,y1,z1ï¿½ï¿½
 		{}
 
 		uint32_t GetComponentCount() const {
@@ -67,7 +67,7 @@ namespace Hazel
 			return 0;
 		}
 
-		// ¾¡¹ÜÓÐÐ©ÀàÐÍÊÇÏòÁ¿£¬µ«ÎÒÃÇ»á¸ù¾ÝGetComponentCount»ñÈ¡·ÖÁ¿¸öÊý£¬¼ÆËãµÃµ½ÕýÈ·µÄ´óÐ¡
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç»ï¿½ï¿½ï¿½ï¿½GetComponentCountï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½È·ï¿½Ä´ï¿½Ð¡
 		uint32_t GetTypeToGLType(ShaderDataType type) {
 			switch (type) {
 			case ShaderDataType::Float:		return 0x1406;//GL_FLOAT == 0x1406
@@ -101,11 +101,11 @@ namespace Hazel
 		inline const std::vector<LayoutElement>& GetElements() const { return m_Elements; }
 		inline const uint32_t& GetStride() const { return m_Stride; }
 
-		//·½±ãÔÚ for each ÖÐ½« m_Element ×÷Îª range
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ for each ï¿½Ð½ï¿½ m_Element ï¿½ï¿½Îª range
 		std::vector<LayoutElement>::iterator begin() { return m_Elements.begin(); };
-		//£¡£¡£¡£¡º¯ÊýÃû£¨µü´úÆ÷Ãû³Æ£©¼ÇµÃÊÇÐ¡Ð´ :"end"
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½Çµï¿½ï¿½ï¿½Ð¡Ð´ :"end"
 		std::vector<LayoutElement>::iterator end() { return m_Elements.end(); };
-		//Èç¹û layout ÊÇ const£¬ÔòÐèÒª const ÀàÐÍµÄµü´úÆ÷Ð­Öú layout ×÷Îª range
+		//ï¿½ï¿½ï¿½ layout ï¿½ï¿½ constï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òª const ï¿½ï¿½ï¿½ÍµÄµï¿½ï¿½ï¿½ï¿½ï¿½Ð­ï¿½ï¿½ layout ï¿½ï¿½Îª range
 		std::vector<LayoutElement>::const_iterator begin() const { return m_Elements.begin(); }
 		std::vector<LayoutElement>::const_iterator end() const { return m_Elements.end(); }
 	private:
@@ -118,9 +118,9 @@ namespace Hazel
 			size_t offset = 0;
 			for (auto& element : m_Elements)
 			{
-				element.Offset = offset;//µÚÒ»¸ö²¼¾ÖµÄ offset Îª 0£¬ºóÐøÀÛ¼Ó
+				element.Offset = offset;//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ offset Îª 0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¼ï¿½
 				offset += element.Size;
-				m_Stride += element.Size;// Size ÔÚ LayoutElement µÄ¹¹Ôìº¯ÊýÖÐ±»¼ÆËãÁË
+				m_Stride += element.Size;// Size ï¿½ï¿½ LayoutElement ï¿½Ä¹ï¿½ï¿½ìº¯ï¿½ï¿½ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			}
 		}
 	};
@@ -160,5 +160,44 @@ namespace Hazel
 		virtual uint32_t GetCount() const = 0;
 
 		static Ref<IndexBuffer> Create(uint32_t* indices, uint32_t count);
+	};
+	
+
+	//////////////////////////////////////////////////////
+	/////////////////// PixelUnpackBuffer ////////////////
+	//////////////////////////////////////////////////////
+	class PixelUnpackBuffer
+	{
+	public:
+		virtual  ~PixelUnpackBuffer() {}
+
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
+
+		virtual void* MapBuffer() const = 0;
+		virtual void UnmapBuffer() const = 0;
+
+		static Ref<PixelUnpackBuffer> Create(uint32_t size);
+	};
+	
+
+	//////////////////////////////////////////////////////
+	/////////////////// AtomicCounterBuffer //////////////
+	//////////////////////////////////////////////////////
+	class AtomicCounterBuffer
+	{
+	public:
+		virtual  ~AtomicCounterBuffer() {}
+
+		virtual void Bind() const = 0;
+		virtual void BindBase(uint32_t index) const = 0;
+		virtual void Unbind() const = 0;
+
+		virtual void* MapBuffer() const = 0;
+		virtual void UnmapBuffer() const = 0;
+		virtual void Reset(uint32_t value) const = 0;
+		virtual uint32_t GetRendererID() const = 0;
+
+		static Ref<AtomicCounterBuffer> Create();
 	};
 }

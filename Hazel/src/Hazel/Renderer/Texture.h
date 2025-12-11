@@ -6,6 +6,16 @@
 
 namespace Hazel
 {
+	enum class ImageFormat
+	{
+		None = 0,
+		R8,
+		RGB8,
+		RGBA8,
+		RGBA32F,
+		R32UI,
+		RGBA32UI,
+	};
 
 	class Texture
 	{
@@ -18,6 +28,7 @@ namespace Hazel
 		virtual void SetData(void* data, uint32_t size) = 0;
 
 		virtual void Bind(uint32_t slot = 0) const = 0;
+		virtual void BindImageTexture(uint32_t unit = 0) const = 0;
 
 		virtual uint32_t GetRendererID() const = 0;
 
@@ -30,7 +41,14 @@ namespace Hazel
 	{
 	public:
 		static Ref<Texture2D> Create(uint32_t width, uint32_t height);
+		static Ref<Texture2D> Create(uint32_t width, uint32_t height, ImageFormat format);
 		static Ref<Texture2D> Create(const std::string& path);
+	};
+
+	class TextureBuffer : public Texture
+	{
+	public:
+		static Ref<TextureBuffer> Create(uint32_t size, ImageFormat format);
 	};
 
 }
