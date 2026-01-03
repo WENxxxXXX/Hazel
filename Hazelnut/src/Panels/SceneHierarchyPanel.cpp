@@ -246,7 +246,7 @@ namespace Hazel
 						}
 
 						if (isSelected)
-							ImGui::SetItemDefaultFocus();	// ÓÃÓÚ¸üĞÂ½¹µã£¨½¹µã²»Í¬ÓÚ¸ßÁÁÏÔÊ¾£©
+							ImGui::SetItemDefaultFocus();	// ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½Â½ï¿½ï¿½ã£¨ï¿½ï¿½ï¿½ã²»Í¬ï¿½Ú¸ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½
 					}
 					ImGui::EndCombo();
 				}
@@ -393,7 +393,7 @@ namespace Hazel
 						}
 
 						if (isSelected)
-							ImGui::SetItemDefaultFocus();	// ÓÃÓÚ¸üĞÂ½¹µã£¨½¹µã²»Í¬ÓÚ¸ßÁÁÏÔÊ¾£©
+							ImGui::SetItemDefaultFocus();	// ç”¨äºæ›´æ–°ç„¦ç‚¹ï¼ˆç„¦ç‚¹ä¸åŒäºé«˜äº®æ˜¾ç¤ºï¼‰
 					}
 					ImGui::EndCombo();
 				}
@@ -407,6 +407,48 @@ namespace Hazel
 
 					ImGui::DragFloat("shininess", &component.shininess, 5.0f, 1.0f, 1024.0f);
 					ImGui::DragFloat("alpha", &component.alpha, 0.01f, 0.0f, 1.0f);
+				}
+				else if (component.shaderType == ShaderType::PBR)
+				{
+					auto drawTextureControl = [](const char* label, Ref<Texture2D>& texture)
+					{
+						ImGui::PushID(label);
+						ImGui::Text(label);
+
+						if (texture)
+						{
+							ImGui::ImageButton((ImTextureID)texture->GetRendererID(), { 64, 64 }, { 0, 1 }, { 1, 0 });
+						}
+						else
+						{
+							ImGui::Button("Drop Texture", { 64, 64 });
+						}
+
+						if (ImGui::BeginDragDropTarget())
+						{
+							if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+							{
+								const wchar_t* path = (const wchar_t*)payload->Data;
+								std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+								texture = Texture2D::Create(texturePath.string());
+							}
+							ImGui::EndDragDropTarget();
+						}
+
+						if (texture)
+						{
+							ImGui::SameLine();
+							if (ImGui::Button("Delete"))
+								texture = nullptr;
+						}
+						ImGui::PopID();
+					};
+
+					drawTextureControl("Albedo Map", component.albedoMap);
+					drawTextureControl("Normal Map", component.normalMap);
+					drawTextureControl("Metallic Map", component.metallicMap);
+					drawTextureControl("Roughness Map", component.roughnessMap);
+					drawTextureControl("AO Map", component.aoMap);
 				}
 			});
 	}

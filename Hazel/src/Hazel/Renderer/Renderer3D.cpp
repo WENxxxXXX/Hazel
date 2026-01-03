@@ -16,9 +16,14 @@ namespace Hazel
 		Ref<IndexBuffer> screenQuadEBO;
 
 		Ref<Texture2D> headPointTexture;
-		Ref<PixelUnpackBuffer> headPoinntClearBuffer;
+		Ref<PixelUnpackBuffer> headPointClearBuffer;
 		Ref<AtomicCounterBuffer> atomicCountBuffer;
 		Ref<TextureBuffer> linkedListBuffer;
+
+		Ref<Texture2D> whiteTexture;
+
+		int maxWidth;
+		int maxHeight;
 	};
 	static Renderer3DData s_3DData;
 
@@ -40,8 +45,13 @@ namespace Hazel
 		s_3DData.shaderMaps[ShaderType::BlinnPhong] = Shader::Create("assets/shaders/Blinn-phong.glsl");
 		s_3DData.shaderMaps[ShaderType::WeightedBlendOIT] = Shader::Create("assets/shaders/WeightedBlend_Transparent.glsl");
 		s_3DData.shaderMaps[ShaderType::LinkedListOIT_Build] = Shader::Create("assets/shaders/LinkedListOIT_Build.glsl");
+		s_3DData.shaderMaps[ShaderType::PBR] = Shader::Create("assets/shaders/pbr.glsl");
 		s_3DData.compositeShader = Shader::Create("assets/shaders/WeightedBlend_Composite.glsl");
 		s_3DData.linkedListOITResolveShader = Shader::Create("assets/shaders/LinkedListOIT_Resolve.glsl");
+
+		uint32_t whiteTextureData = 0xffffffff;
+		s_3DData.whiteTexture = Texture2D::Create(1, 1, ImageFormat::RGBA8);
+		s_3DData.whiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 
 		// s_3DData Quad
 		s_3DData.screenQuadVAO = VertexArray::Create();
@@ -64,22 +74,22 @@ namespace Hazel
 		s_3DData.screenQuadEBO = IndexBuffer::Create(quadIndices, sizeof(quadIndices) / sizeof(uint32_t));
 		s_3DData.screenQuadVAO->SetIndexBuffer(s_3DData.screenQuadEBO);
 
-		int maxWidth = RendererCommand::GetMaxMonitorSize().first;
-		int maxHeight = RendererCommand::GetMaxMonitorSize().second;
-		s_3DData.headPointTexture = Texture2D::Create(maxWidth, maxHeight, ImageFormat::R32UI);
+		s_3DData.maxWidth = RendererCommand::GetMaxMonitorSize().first;
+		s_3DData.maxHeight = RendererCommand::GetMaxMonitorSize().second;
+		s_3DData.headPointTexture = Texture2D::Create(s_3DData.maxWidth, s_3DData.maxHeight, ImageFormat::R32UI);
 		s_3DData.headPointTexture->BindImageTexture(0);
 
-		s_3DData.headPoinntClearBuffer = PixelUnpackBuffer::Create(maxWidth * maxHeight * sizeof(uint32_t));
-		void* data = s_3DData.headPoinntClearBuffer->MapBuffer();
-		memset(data, 0, maxWidth * maxHeight * sizeof(uint32_t));
-		s_3DData.headPoinntClearBuffer->UnmapBuffer();
+		s_3DData.headPointClearBuffer = PixelUnpackBuffer::Create(s_3DData.maxWidth * s_3DData.maxHeight * sizeof(uint32_t));
+		void* data = s_3DData.headPointClearBuffer->MapBuffer();
+		memset(data, 0, s_3DData.maxWidth * s_3DData.maxHeight * sizeof(uint32_t));
+		s_3DData.headPointClearBuffer->UnmapBuffer();
 
 		s_3DData.atomicCountBuffer = AtomicCounterBuffer::Create();
 		uint32_t* initData = (uint32_t*)s_3DData.atomicCountBuffer->MapBuffer();
 		initData[0] = 0;
 		s_3DData.atomicCountBuffer->UnmapBuffer();
 
-		s_3DData.linkedListBuffer = TextureBuffer::Create(maxWidth * maxHeight * 3 * 16, ImageFormat::RGBA32UI);
+		s_3DData.linkedListBuffer = TextureBuffer::Create(s_3DData.maxWidth * s_3DData.maxHeight * 3 * 16, ImageFormat::RGBA32UI);
 	}
 
 	void Renderer3D::BeginScene(const EditorCamera& camera)
@@ -114,14 +124,21 @@ namespace Hazel
 		s_3DData.shaderMaps[ShaderType::LinkedListOIT_Build]->SetFloat3("dirLight.diffuse", glm::vec3(1.0f));
 		s_3DData.shaderMaps[ShaderType::LinkedListOIT_Build]->SetFloat3("dirLight.specular", glm::vec3(1.0f));
 
+		s_3DData.shaderMaps[ShaderType::PBR]->Bind();
+		s_3DData.shaderMaps[ShaderType::PBR]->SetMat4("u_ViewProjection", viewProjectionMatrix);
+		s_3DData.shaderMaps[ShaderType::PBR]->SetFloat3("viewPos", cameraPos);
+		s_3DData.shaderMaps[ShaderType::PBR]->SetFloat3("lightDir",
+			glm::inverse(camera.GetViewMatrix()) * glm::vec4(0.1f, 0.2f, -1.0f, 0.0f));
+		s_3DData.shaderMaps[ShaderType::PBR]->SetFloat3("lightColor", glm::vec3(10.0f));
+
 		s_3DData.atomicCountBuffer->Reset(1);
 		s_3DData.atomicCountBuffer->BindBase(0);
 		s_3DData.headPointTexture->BindImageTexture(0);
 		s_3DData.linkedListBuffer->BindImageTexture(1);
 
-		s_3DData.headPoinntClearBuffer->Bind();
-		s_3DData.headPointTexture->SetData(nullptr, RendererCommand::GetMaxMonitorSize().first * RendererCommand::GetMaxMonitorSize().second * sizeof(uint32_t));
-		s_3DData.headPoinntClearBuffer->Unbind();
+		s_3DData.headPointClearBuffer->Bind();
+		s_3DData.headPointTexture->SetData(nullptr, s_3DData.maxWidth * s_3DData.maxHeight * sizeof(uint32_t));
+		s_3DData.headPointClearBuffer->Unbind();
 	}
 
 	void Renderer3D::EndScene()
@@ -159,6 +176,39 @@ namespace Hazel
 			s_3DData.shaderMaps[material.shaderType]->SetFloat("material.shininess", material.shininess);
 			s_3DData.shaderMaps[material.shaderType]->SetFloat("material.alpha", material.alpha);
 			break;
+		case ShaderType::PBR:
+			s_3DData.shaderMaps[material.shaderType]->Bind();
+			s_3DData.shaderMaps[material.shaderType]->SetMat4("u_Transform", transform);
+			s_3DData.shaderMaps[material.shaderType]->SetInt("u_entityID", entityID);
+
+			if (material.albedoMap) material.albedoMap->Bind(0);
+			else s_3DData.whiteTexture->Bind(0);
+
+			if (material.normalMap)
+			{
+				material.normalMap->Bind(1);
+				s_3DData.shaderMaps[material.shaderType]->SetFloat("u_UseNormalMap", 1.0f);
+			}
+			else
+			{
+				s_3DData.shaderMaps[material.shaderType]->SetFloat("u_UseNormalMap", 0.0f);
+			}
+
+			if (material.metallicMap) material.metallicMap->Bind(2);
+			else s_3DData.whiteTexture->Bind(2);
+
+			if (material.roughnessMap) material.roughnessMap->Bind(3);
+			else s_3DData.whiteTexture->Bind(3);
+
+			if (material.aoMap) material.aoMap->Bind(4);
+			else s_3DData.whiteTexture->Bind(4);
+
+			s_3DData.shaderMaps[material.shaderType]->SetInt("albedoMap", 0);
+			s_3DData.shaderMaps[material.shaderType]->SetInt("normalMap", 1);
+			s_3DData.shaderMaps[material.shaderType]->SetInt("metallicMap", 2);
+			s_3DData.shaderMaps[material.shaderType]->SetInt("roughnessMap", 3);
+			s_3DData.shaderMaps[material.shaderType]->SetInt("aoMap", 4);
+			break;
 		case ShaderType::LinkedListOIT_Build:
 			s_3DData.shaderMaps[material.shaderType]->Bind();
 			s_3DData.shaderMaps[material.shaderType]->SetMat4("u_Transform", transform);
@@ -170,7 +220,7 @@ namespace Hazel
 			s_3DData.shaderMaps[material.shaderType]->SetFloat("material.shininess", material.shininess);
 			s_3DData.shaderMaps[material.shaderType]->SetFloat("material.alpha", material.alpha);
 
-			//RendererCommand::MemeryBarrierTexFetch();
+			RendererCommand::MemeryBarrierTexFetch();
 			RendererCommand::SetDepthMask(false);
 			RendererCommand::SetColorMaski(0, false, false, false, false);
 			RendererCommand::DrawIndexed(vertexArray, indexCount);
@@ -187,8 +237,8 @@ namespace Hazel
 	{
 
 		// Ensure texture writes are visible
-		//RendererCommand::MemeryBarrierTexFetch();
-		//RendererCommand::Flush();
+		RendererCommand::MemeryBarrierTexFetch();
+		RendererCommand::Flush();
 
 		RendererCommand::SetDepthTest(false);
 		RendererCommand::SetBlendFunc(RendererAPI::BlendFactor::SrcAlpha, RendererAPI::BlendFactor::OneMinusSrcAlpha);
@@ -215,7 +265,7 @@ namespace Hazel
 
 	void Renderer3D::ResolveOIT(const Ref<FrameBuffer>& framebuffer)
 	{
-		//RendererCommand::MemeryBarrierTexFetch();
+		RendererCommand::MemeryBarrierTexFetch();
 		//RendererCommand::Flush();
 
 		RendererCommand::SetDepthTest(false);

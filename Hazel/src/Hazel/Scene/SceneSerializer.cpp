@@ -399,6 +399,18 @@ namespace Hazel
             out << YAML::Key << "shininess" << YAML::Value << materialComponent.shininess;
             out << YAML::Key << "alpha" << YAML::Value << materialComponent.alpha;
 
+            // PBR Textures
+            if (materialComponent.albedoMap && !materialComponent.albedoMap->GetPath().empty())
+                out << YAML::Key << "albedoMap" << YAML::Value << materialComponent.albedoMap->GetPath();
+            if (materialComponent.normalMap && !materialComponent.normalMap->GetPath().empty())
+                out << YAML::Key << "normalMap" << YAML::Value << materialComponent.normalMap->GetPath();
+            if (materialComponent.metallicMap && !materialComponent.metallicMap->GetPath().empty())
+                out << YAML::Key << "metallicMap" << YAML::Value << materialComponent.metallicMap->GetPath();
+            if (materialComponent.roughnessMap && !materialComponent.roughnessMap->GetPath().empty())
+                out << YAML::Key << "roughnessMap" << YAML::Value << materialComponent.roughnessMap->GetPath();
+            if (materialComponent.aoMap && !materialComponent.aoMap->GetPath().empty())
+                out << YAML::Key << "aoMap" << YAML::Value << materialComponent.aoMap->GetPath();
+
             out << YAML::EndMap;
         }
 
@@ -505,6 +517,12 @@ namespace Hazel
             mc.specular = materialComponent["specular"].as<glm::vec3>();
             mc.shininess = materialComponent["shininess"].as<float>();
             mc.alpha = materialComponent["alpha"].as<float>();
+
+            if (materialComponent["albedoMap"]) mc.albedoMap = Texture2D::Create(materialComponent["albedoMap"].as<std::string>());
+            if (materialComponent["normalMap"]) mc.normalMap = Texture2D::Create(materialComponent["normalMap"].as<std::string>());
+            if (materialComponent["metallicMap"]) mc.metallicMap = Texture2D::Create(materialComponent["metallicMap"].as<std::string>());
+            if (materialComponent["roughnessMap"]) mc.roughnessMap = Texture2D::Create(materialComponent["roughnessMap"].as<std::string>());
+            if (materialComponent["aoMap"]) mc.aoMap = Texture2D::Create(materialComponent["aoMap"].as<std::string>());
         }
     }
 }

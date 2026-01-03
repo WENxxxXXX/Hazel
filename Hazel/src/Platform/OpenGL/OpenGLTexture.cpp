@@ -75,7 +75,11 @@ namespace Hazel
 	{
 		HZ_PROFILE_FUNCTION();
 
-		stbi_set_flip_vertically_on_load(1);
+		size_t lastDot = path.find_last_of('.');
+		if (lastDot != std::string::npos && path.substr(lastDot) == ".tga")
+			stbi_set_flip_vertically_on_load(false);
+		else
+			stbi_set_flip_vertically_on_load(true);
 
 		int width, height, channels;
 		stbi_uc* data = nullptr;
@@ -121,13 +125,13 @@ namespace Hazel
 		glDeleteTextures(1, &m_RendererID);
 	}
 
-	void OpenGLTexture2D::SetData(void* data, uint32_t size)// ���ݺ������ڴ��С
+	void OpenGLTexture2D::SetData(void* data, uint32_t size)
 	{
 		HZ_PROFILE_FUNCTION();
 
-		uint32_t bpp = (m_DataFormat == GL_RGBA ? 4 : 3);
+		uint32_t bpp = (m_DataFormat == GL_RGBA || m_DataFormat == GL_RGBA_INTEGER || m_InternalFormat == GL_R32UI ? 4 : 3);
 		HZ_CORE_ASSERT((size == m_Width * m_Height * bpp), "Data must contain the full texture! Please check that the size of the data matches the format of the data");
-		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);// �ϴ�����
+		glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
 	}
 
 	void OpenGLTexture2D::Bind(uint32_t slot) const

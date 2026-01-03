@@ -22,6 +22,8 @@ namespace Hazel
 
 		uint32_t GetRendererID() const override { return m_RendererID; }
 
+		const std::string& GetPath() const override { return m_Path; }
+
 		bool operator==(const Texture& other) const override
 		{
 			return (this->m_RendererID == ((OpenGLTexture2D&)other).m_RendererID);

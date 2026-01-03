@@ -1,0 +1,23 @@
+Scene: Untitled
+Entities:
+  - Entity: 18251497320228628810
+    TagComponent:
+      Tag: Gun
+    TransformComponent:
+      Translation: [4.878616, 2.3267863, 12.938581]
+      Rotation: [1.5707964, 0, 0]
+      Scale: [0.24097055, 0.24096993, 0.24096993]
+    MeshComponent:
+      filePath: assets\objects\Cerberus_by_Andrew_Maximov\Cerberus_LP.FBX
+    MaterialComponent:
+      shaderType: PBR
+      ambient: [1, 1, 1]
+      diffuse: [1, 1, 1]
+      specular: [1, 1, 1]
+      shininess: 32
+      alpha: 0.72
+      albedoMap: assets\objects\Cerberus_by_Andrew_Maximov\Textures\Cerberus_A.tga
+      normalMap: assets\objects\Cerberus_by_Andrew_Maximov\Textures\Cerberus_N.tga
+      metallicMap: assets\objects\Cerberus_by_Andrew_Maximov\Textures\Cerberus_M.tga
+      roughnessMap: assets\objects\Cerberus_by_Andrew_Maximov\Textures\Cerberus_R.tga
+      aoMap: assets\objects\Cerberus_by_Andrew_Maximov\Textures\Raw\Cerberus_AO.tga

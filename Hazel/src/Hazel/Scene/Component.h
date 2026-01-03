@@ -102,7 +102,7 @@ namespace Hazel
 		ScriptableEntity* Instance = nullptr;
 
 		// Set functions( Use std::function )
-		std::function<ScriptableEntity* ()> InstantiateScript;//ÊµÀý»¯½Å±¾
+		std::function<ScriptableEntity* ()> InstantiateScript;//Êµï¿½ï¿½ï¿½ï¿½ï¿½Å±ï¿½
 		std::function<void(NativeScriptComponent*)> DeinstantiateScript;
 
 		//std::function<void(ScriptableEntity*)> OnCreateFunction;
@@ -137,17 +137,17 @@ namespace Hazel
 
 	struct BoxCollider2DComponent
 	{
-		glm::vec2 Offset = { 0.0f, 0.0f };					// ÖØÐÄÆ«ÒÆÁ¿
-		glm::vec2 Size = { 0.5f, 0.5f };					// Åö×²Ìå»ý
+		glm::vec2 Offset = { 0.0f, 0.0f };					// ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
+		glm::vec2 Size = { 0.5f, 0.5f };					// ï¿½ï¿½×²ï¿½ï¿½ï¿½
 
 		// TODO: May move this to Physics Material
-		float Density = 1.0f;								// ÃÜ¶È
-		float Friction = 0.5f;								// Ä¦²ÁÁ¦
-		float Restitution = 0.0f;							// »Ö¸´
-		float RestitutionThreshold = 0.5f;					// »Ö¸´ãÐÖµ
+		float Density = 1.0f;								// ï¿½Ü¶ï¿½
+		float Friction = 0.5f;								// Ä¦ï¿½ï¿½ï¿½ï¿½
+		float Restitution = 0.0f;							// ï¿½Ö¸ï¿½
+		float RestitutionThreshold = 0.5f;					// ï¿½Ö¸ï¿½ï¿½ï¿½Öµ
 
 		// Storage for runtime
-		void* RuntimeFixture = nullptr;						// ÔËÐÐÊ±µÄÅä¼þ¡¢ÔËÐÐÊ±¸½¼þ
+		void* RuntimeFixture = nullptr;						// ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
 
 		BoxCollider2DComponent() = default;
 		BoxCollider2DComponent(const BoxCollider2DComponent&) = default;
@@ -155,17 +155,17 @@ namespace Hazel
 
 	struct CircleCollider2DComponent
 	{
-		glm::vec2 Offset = { 0.0f, 0.0f };					// ÖØÐÄÆ«ÒÆÁ¿
-		float Radius = 0.5f;								// Åö×²°ë¾¶´óÐ¡
+		glm::vec2 Offset = { 0.0f, 0.0f };					// ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
+		float Radius = 0.5f;								// ï¿½ï¿½×²ï¿½ë¾¶ï¿½ï¿½Ð¡
 
 		// TODO: May move this to Physics Material
-		float Density = 1.0f;								// ÃÜ¶È
-		float Friction = 0.5f;								// Ä¦²ÁÁ¦
-		float Restitution = 0.0f;							// »Ö¸´
-		float RestitutionThreshold = 0.5f;					// »Ö¸´ãÐÖµ
+		float Density = 1.0f;								// ï¿½Ü¶ï¿½
+		float Friction = 0.5f;								// Ä¦ï¿½ï¿½ï¿½ï¿½
+		float Restitution = 0.0f;							// ï¿½Ö¸ï¿½
+		float RestitutionThreshold = 0.5f;					// ï¿½Ö¸ï¿½ï¿½ï¿½Öµ
 
 		// Storage for runtime
-		void* RuntimeFixture = nullptr;						// ÔËÐÐÊ±µÄÅä¼þ¡¢ÔËÐÐÊ±¸½¼þ
+		void* RuntimeFixture = nullptr;						// ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
 
 		CircleCollider2DComponent() = default;
 		CircleCollider2DComponent(const CircleCollider2DComponent&) = default;
@@ -198,6 +198,13 @@ namespace Hazel
 		glm::vec3 specular = { 1.0f, 1.0f, 1.0f };
 		float shininess = 32.0f;
 		float alpha = 0.5f;
+
+		// PBR Maps
+		Ref<Texture2D> albedoMap;
+		Ref<Texture2D> normalMap;
+		Ref<Texture2D> metallicMap;
+		Ref<Texture2D> roughnessMap;
+		Ref<Texture2D> aoMap;
 
 		MaterialComponent() = default;
 		MaterialComponent(const MaterialComponent&) = default;
